@@ -12,10 +12,9 @@ results/
 .DS_Store
 .idea
 
-# Temp Yaml Files
+# Temp Files
 deploy/.aws-sam/
 deploy/samconfig.toml
-deploy/practice.yaml
 
 # Ignore changes to .env
 .env
