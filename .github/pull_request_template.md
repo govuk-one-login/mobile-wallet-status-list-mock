@@ -9,7 +9,7 @@
 <!-- List any related Jira tickets -->
 <!-- List any related ADRs or RFCs -->
 
-- [DCMAW-XXXX](https://govukverify.atlassian.net/browse/DCMAW-XXX)
+- [DCMAW-XXXX](https://govukverify.atlassian.net/browse/DCMAW-XXXX)
 
 ## Testing
 <!-- Give an overview of how the changes were tested and attach evidence (if applicable) -->
