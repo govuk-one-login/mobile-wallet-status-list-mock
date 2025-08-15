@@ -1,14 +1,15 @@
-# mobile-wallet-status-list-mock
+# Mobile Wallet Status List Mock
 
 ## Overview
 
-A service that allows credential issuer to communicate the current status of issued credentials (active, revoked, etc.) to wallet and verifier.
+This is a mock implementation of the Status List service used by GOV.UK Wallet to check the current status of its stored credentials.
+
+It is designed for integration with the Example Credential Issuer (CRI) and GOV.UK Wallet in the development and build environments only.
 
 ## Pre-requisites
 
 - [Node.js](https://nodejs.org/en/) (>= 20.11.1)
 - [NPM](https://www.npmjs.com/)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 - [Homebrew](https://brew.sh)
 
