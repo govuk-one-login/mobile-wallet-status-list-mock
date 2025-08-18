@@ -1,0 +1,682 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Status List Mock
+
+Parameters:
+  CodeSigningConfigArn:
+    Description: The ARN of the Code Signing Config to use, provided by the deployment pipeline
+    Type: String
+    Default: none
+  Environment:
+    Description: The name of the environment to deploy to
+    Type: String
+    AllowedValues:
+      - dev
+      - build
+    Default: dev
+  PermissionsBoundary:
+    Description: |
+      The ARN of the permissions boundary to apply to any role created by the template
+    Type: String
+    Default: none
+  VpcStackName:
+    Description: |
+      The stack name of the VPC where the Lambda functions will be deployed
+    Type: String
+    Default: platform-vpc
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      LambdaLogLevel: DEBUG
+    build:
+      LambdaLogLevel: INFO
+  EnvironmentConfiguration:
+    dev:
+      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+    build:
+      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+  AccountAccess:
+    dev:
+      AccountId: arn:aws:iam::537124944731:root
+    build:
+      AccountId: arn:aws:iam::881490088364:root
+  KMS:
+    dev:
+      PendingDeletionInDays: 7
+    build:
+      PendingDeletionInDays: 30
+
+Conditions:
+  UsePermissionsBoundary: !Not
+    - !Equals
+      - !Ref PermissionsBoundary
+      - none
+  UseCodeSigning: !Not
+    - !Equals
+      - !Ref CodeSigningConfigArn
+      - none
+
+Globals:
+  Function:
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    MemorySize: 512
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+    Runtime: nodejs22.x
+    Timeout: 15
+    LoggingConfig:
+      ApplicationLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      SystemLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      LogFormat: JSON
+    Environment:
+      Variables:
+        DT_CONNECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentConfiguration
+              - !Ref Environment
+              - dynatraceSecretArn
+        DT_CONNECTION_BASE_URL: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
+          - SecretArn: !FindInMap
+              - EnvironmentConfiguration
+              - !Ref Environment
+              - dynatraceSecretArn
+        DT_CLUSTER_ID: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
+          - SecretArn: !FindInMap
+              - EnvironmentConfiguration
+              - !Ref Environment
+              - dynatraceSecretArn
+        DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentConfiguration
+              - !Ref Environment
+              - dynatraceSecretArn
+        DT_TENANT: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
+          - SecretArn: !FindInMap
+              - EnvironmentConfiguration
+              - !Ref Environment
+              - dynatraceSecretArn
+        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
+    Layers:
+      - !Sub
+        - '{{resolve:secretsmanager:${SecretArn}:SecretString:NODEJS_LAYER}}'
+        - SecretArn: !FindInMap
+            - EnvironmentConfiguration
+            - !Ref Environment
+            - dynatraceSecretArn
+
+Resources:
+  IssueFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - IssueLogGroup
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - src/functions/issueHandler.ts
+    Properties:
+      Events:
+        IssueIndex:
+          Type: Api
+          Properties:
+            Path: /issue
+            Method: post
+            RestApiId: !Ref PrivateApi
+      FunctionName: !Sub ${AWS::StackName}-issue
+      Handler: src/functions/issueHandler.handler
+      Role: !GetAtt IssueFunctionLambdaRole.Arn
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Issue
+          SIGNING_KEY: !Ref SigningKey
+          STATUS_LIST_BUCKET: !Ref StatusListBucket
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+
+  IssueFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-issue-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: IssueFunctionLoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+        - PolicyName: VpcPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'
+        - PolicyName: S3BucketAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+#                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-status-list/*
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Sign
+                Resource: !GetAtt SigningKey.Arn
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  IssueLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue-status-list-entry
+      RetentionInDays: 30
+
+  RevokeFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - RevokeLogGroup
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - src/functions/revokeHandler.ts
+    Properties:
+      Events:
+        IssueIndex:
+          Type: Api
+          Properties:
+            Path: /revoke
+            Method: post
+            RestApiId: !Ref PrivateApi
+      FunctionName: !Sub ${AWS::StackName}-revoke
+      Handler: src/functions/revokeHandler.handler
+      Role: !GetAtt RevokeFunctionLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Revoke
+          STATUS_LIST_BUCKET: !Ref StatusListBucket
+          SIGNING_KEY: !Ref SigningKey
+
+  RevokeFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-revoke-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: RevokeFunctionLoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt RevokeLogGroup.Arn
+        - PolicyName: S3BucketAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  #                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-status-list/*
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Sign
+                Resource: !GetAtt SigningKey.Arn
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  RevokeLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
+      RetentionInDays: 30
+
+  SigningKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for signing JWTs
+      Enabled: true
+      KeyUsage: SIGN_VERIFY
+      KeySpec: ECC_NIST_P256
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
+
+  SigningKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${AWS::StackName}-SigningKey
+      TargetKeyId: !Ref SigningKey
+
+  PrivateApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${AWS::StackName}-private-api
+      Description: Private API gateway for Index Issuance flow
+      AlwaysDeploy: true
+      EndpointConfiguration:
+        Type: PRIVATE
+      Auth:
+        ResourcePolicy:
+          IntrinsicVpceWhitelist:
+            - !ImportValue platform-vpc-ExecuteApiGatewayEndpointId
+      StageName: !Ref Environment
+      OpenApiVersion: 3.0.0
+      AccessLogSetting:
+        DestinationArn: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${PrivateApiAccessLogs}
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+      MethodSettings:
+        - LoggingLevel: INFO
+          ResourcePath: /*
+          HttpMethod: '*'
+          DataTraceEnabled: false
+          MetricsEnabled: true
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 10
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ./openApiSpecs/private-spec.yaml
+
+  PrivateApiAccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-private-api-access-logs
+      RetentionInDays: 30
+
+#  PrivateApiBasePathMapping:
+#    Type: AWS::ApiGateway::BasePathMapping
+#    Properties:
+#      DomainName: !Ref PrivateApiDomainName
+#      RestApiId: !Ref PublicApi
+#      Stage: !Ref PrivateApi.Stage
+
+#  PrivateApiDomainName:
+#    Type: AWS::ApiGateway::DomainName
+#    Properties:
+
+#  PrivateApiRecordSet:
+#    Type: AWS::Route53::RecordSet
+#    Properties:
+
+  PublicApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${AWS::StackName}-public-api
+      Description: Regional API gateway for Status List and JWKS
+      StageName: !Ref Environment
+      OpenApiVersion: 3.0.0
+      AccessLogSetting:
+        DestinationArn: !GetAtt PublicApiAccessLogs.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+      EndpointConfiguration:
+        Type: REGIONAL
+      MethodSettings:
+        - LoggingLevel: INFO
+          ResourcePath: /*
+          HttpMethod: '*'
+          DataTraceEnabled: false
+          MetricsEnabled: true
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 10
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ./openApiSpecs/public-spec.yaml
+
+  PublicApiAccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-public-api-access-logs
+      RetentionInDays: 30
+
+#  PublicApiBasePathMapping:
+#    Type: AWS::ApiGateway::BasePathMapping
+#    Properties:
+#      DomainName: !Ref PublicApiDomainName
+#      RestApiId: !Ref PublicApi
+#      Stage: !Ref PublicApi.Stage
+
+#  PublicApiDomainName:
+#    Type: AWS::ApiGateway::DomainName
+#    Properties:
+
+#  PublicApiRecordSet:
+#    Type: AWS::Route53::RecordSet
+#    Properties:
+
+  JwksFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - JwksFunctionLogGroup
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/functions/jwksHandler.ts
+        Minify: true
+        Sourcemap: false
+        Target: es2022
+    Properties:
+      Environment:
+        Variables:
+          SIGNING_KEY: !Ref SigningKey
+          JWKS_BUCKET_NAME: !Ref JsonWebKeysBucket
+          JWKS_FILE_NAME: .well-known/jwks.json
+      FunctionName: !Sub ${AWS::StackName}-jwks
+      Handler: src/functions/jwksHandler.handler
+      Role: !GetAtt JwksFunctionLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+
+  JwksFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-jwks
+      RetentionInDays: 30
+
+  JwksFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-jwks-lambda-role
+      Description: Role of JWKS function
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: UploadPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}/*
+                    - TargetBucket: !Ref JsonWebKeysBucket
+        - PolicyName: GetPublicKeyPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:GetPublicKey
+                Resource:
+                  - !GetAtt SigningKey.Arn
+        - PolicyName: LoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+        - PolicyName: VpcPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  JsonWebKeysCustomResource:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt JwksFunction.Arn
+      ServiceTimeout: 30
+      LambdaVersion: !Ref JwksFunction.Version
+
+  # Status List Bucket
+  StatusListBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${Environment}-status-list
+      VersioningConfiguration:
+        Status: Suspended
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: RemoveExpired
+            Prefix: results/
+            ExpirationInDays: 30
+            Status: Enabled
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue devplatform-s3-access-logs-bucket-S3AccessLogsBucketName
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
+
+  StatusListBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StatusListBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Deny
+            Principal:
+              AWS: '*'
+            Action: '*'
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref StatusListBucket
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  StatusListBucketApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-status-list-bucket-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyName: StatusListBucketPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub ${StatusListBucket.Arn}/*
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  JsonWebKeysBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
+      VersioningConfiguration:
+        Status: Suspended
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue devplatform-s3-access-logs-bucket-S3AccessLogsBucketName
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
+
+  JsonWebKeysBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref JsonWebKeysBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Deny
+            Principal:
+              AWS: '*'
+            Action: '*'
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref JsonWebKeysBucket
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  JsonWebKeysBucketApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-jwks-bucket-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyName: JsonWebKeysBucketPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub ${JsonWebKeysBucket.Arn}/.well-known/jwks.json
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
