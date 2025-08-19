@@ -8,7 +8,7 @@ It is designed for integration with the Example Credential Issuer (CRI) and GOV.
 
 ## Pre-requisites
 
-- [Node.js](https://nodejs.org/en/) (>= 20.11.1)
+- [Node.js](https://nodejs.org/en/) (>= 22)
 - [NPM](https://www.npmjs.com/)
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 - [Homebrew](https://brew.sh)
