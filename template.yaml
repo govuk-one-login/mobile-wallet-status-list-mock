@@ -32,26 +32,12 @@ Mappings:
   EnvironmentVariables:
     dev:
       LambdaLogLevel: DEBUG
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      SelfUrl: status-list-mock.mobile.dev.account.gov.uk
     build:
       LambdaLogLevel: INFO
-
-  EnvironmentConfiguration:
-    dev:
-      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
-    build:
-      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
-
-  AccountAccess:
-    dev:
-      AccountId: arn:aws:iam::537124944731:root
-    build:
-      AccountId: arn:aws:iam::881490088364:root
-
-  KMS:
-    dev:
-      PendingDeletionInDays: 7
-    build:
-      PendingDeletionInDays: 30
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      SelfUrl: status-list-mock.mobile.build.account.gov.uk
 
 Conditions:
   UsePermissionsBoundary: !Not
@@ -95,41 +81,41 @@ Globals:
         DT_CONNECTION_AUTH_TOKEN: !Sub
           - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
           - SecretArn: !FindInMap
-              - EnvironmentConfiguration
+              - EnvironmentVariables
               - !Ref Environment
-              - dynatraceSecretArn
+              - DynatraceSecretArn
         DT_CONNECTION_BASE_URL: !Sub
           - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
           - SecretArn: !FindInMap
-              - EnvironmentConfiguration
+              - EnvironmentVariables
               - !Ref Environment
-              - dynatraceSecretArn
+              - DynatraceSecretArn
         DT_CLUSTER_ID: !Sub
           - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
           - SecretArn: !FindInMap
-              - EnvironmentConfiguration
+              - EnvironmentVariables
               - !Ref Environment
-              - dynatraceSecretArn
+              - DynatraceSecretArn
         DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
           - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
           - SecretArn: !FindInMap
-              - EnvironmentConfiguration
+              - EnvironmentVariables
               - !Ref Environment
-              - dynatraceSecretArn
+              - DynatraceSecretArn
         DT_TENANT: !Sub
           - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
           - SecretArn: !FindInMap
-              - EnvironmentConfiguration
+              - EnvironmentVariables
               - !Ref Environment
-              - dynatraceSecretArn
+              - DynatraceSecretArn
         DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
     Layers:
       - !Sub
         - '{{resolve:secretsmanager:${SecretArn}:SecretString:NODEJS_LAYER}}'
         - SecretArn: !FindInMap
-            - EnvironmentConfiguration
+            - EnvironmentVariables
             - !Ref Environment
-            - dynatraceSecretArn
+            - DynatraceSecretArn
 
 Resources:
   IssueFunction:
@@ -151,7 +137,7 @@ Resources:
             Path: /issue
             Method: post
             RestApiId: !Ref PrivateApi
-      FunctionName: !Sub ${AWS::StackName}-issue
+      FunctionName: !Sub ${AWS::StackName}-issue-2
       Handler: src/functions/issueHandler.handler
       Role: !GetAtt IssueFunctionLambdaRole.Arn
       Environment:
@@ -253,7 +239,7 @@ Resources:
             Path: /revoke
             Method: post
             RestApiId: !Ref PrivateApi
-      FunctionName: !Sub ${AWS::StackName}-revoke
+      FunctionName: !Sub ${AWS::StackName}-revoke-2
       Handler: src/functions/revokeHandler.handler
       Role: !GetAtt RevokeFunctionLambdaRole.Arn
       VpcConfig:
@@ -323,7 +309,7 @@ Resources:
   RevokeLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke-2
       RetentionInDays: 30
 
   SigningKey:
@@ -348,6 +334,29 @@ Resources:
     Properties:
       AliasName: !Sub alias/${AWS::StackName}-SigningKey
       TargetKeyId: !Ref SigningKey
+
+  ApiDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - SelfUrl
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      RegionalCertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
+      SecurityPolicy: TLS_1_2
+
+  ApiRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt ApiDomainName.RegionalHostedZoneId
+      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
+      Name: !Ref ApiDomainName
+      Type: A
 
   PrivateApi:
     Type: AWS::Serverless::Api
@@ -386,20 +395,13 @@ Resources:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-private-api-access-logs
       RetentionInDays: 30
 
-      #  PrivateApiBasePathMapping:
-      #    Type: AWS::ApiGateway::BasePathMapping
-      #    Properties:
-      #      DomainName: !Ref PrivateApiDomainName
-      #      RestApiId: !Ref PublicApi
-      #      Stage: !Ref PrivateApi.Stage
+  PrivateApiBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref ApiDomainName
+      RestApiId: !Ref PrivateApi
+      Stage: !Ref PrivateApi.Stage
 
-      #  PrivateApiDomainName:
-      #    Type: AWS::ApiGateway::DomainName
-      #    Properties:
-
-      #  PrivateApiRecordSet:
-      #    Type: AWS::Route53::RecordSet
-      #    Properties:
   PublicApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -432,20 +434,15 @@ Resources:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-public-api-access-logs
       RetentionInDays: 30
 
-      #  PublicApiBasePathMapping:
-      #    Type: AWS::ApiGateway::BasePathMapping
-      #    Properties:
-      #      DomainName: !Ref PublicApiDomainName
-      #      RestApiId: !Ref PublicApi
-      #      Stage: !Ref PublicApi.Stage
+  PublicApiBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref ApiDomainName
+      RestApiId: !Ref PublicApi
+      Stage: !Ref PublicApi.Stage
 
-      #  PublicApiDomainName:
-      #    Type: AWS::ApiGateway::DomainName
-      #    Properties:
 
-      #  PublicApiRecordSet:
-      #    Type: AWS::Route53::RecordSet
-      #    Properties:
+
   JwksFunction:
     Type: AWS::Serverless::Function
     DependsOn:
@@ -462,9 +459,9 @@ Resources:
       Environment:
         Variables:
           SIGNING_KEY: !Ref SigningKey
-          JWKS_BUCKET_NAME: !Ref JsonWebKeysBucket
+          JWKS_BUCKET_NAME: !Ref JwksBucket
           JWKS_FILE_NAME: .well-known/jwks.json
-      FunctionName: !Sub ${AWS::StackName}-jwks
+      FunctionName: !Sub ${AWS::StackName}-jwks-2
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
       VpcConfig:
@@ -482,7 +479,7 @@ Resources:
   JwksFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-jwks
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-jwks-2
       RetentionInDays: 30
 
   JwksFunctionLambdaRole:
@@ -508,7 +505,7 @@ Resources:
                 Resource:
                   - !Sub
                     - arn:aws:s3:::${TargetBucket}/*
-                    - TargetBucket: !Ref JsonWebKeysBucket
+                    - TargetBucket: !Ref JwksBucket
         - PolicyName: GetPublicKeyPolicy
           PolicyDocument:
             Statement:
@@ -614,10 +611,10 @@ Resources:
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-  JsonWebKeysBucket:
+  JwksBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
+      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks-2
       VersioningConfiguration:
         Status: Suspended
       PublicAccessBlockConfiguration:
@@ -635,10 +632,10 @@ Resources:
           PartitionedPrefix:
             PartitionDateSource: EventTime
 
-  JsonWebKeysBucketPolicy:
+  JwksBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref JsonWebKeysBucket
+      Bucket: !Ref JwksBucket
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -648,12 +645,12 @@ Resources:
             Action: '*'
             Resource: !Sub
               - arn:aws:s3:::${bucketName}/*
-              - bucketName: !Ref JsonWebKeysBucket
+              - bucketName: !Ref JwksBucket
             Condition:
               Bool:
                 aws:SecureTransport: false
 
-  JsonWebKeysBucketApiRole:
+  JwksBucketApiRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub ${AWS::StackName}-jwks-bucket-role
@@ -665,7 +662,7 @@ Resources:
               Service: apigateway.amazonaws.com
         Version: "2012-10-17"
       Policies:
-        - PolicyName: JsonWebKeysBucketPolicy
+        - PolicyName: JwksBucketPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -673,7 +670,7 @@ Resources:
                 Action:
                   - s3:GetObject
                 Resource:
-                  - !Sub ${JsonWebKeysBucket.Arn}/.well-known/jwks.json
+                  - !Sub ${JwksBucket.Arn}/.well-known/jwks.json
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
