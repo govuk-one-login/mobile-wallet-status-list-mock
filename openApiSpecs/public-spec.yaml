@@ -34,7 +34,9 @@ paths:
         credentials:
           Fn::GetAtt: ["StatusListBucketApiRole", "Arn"]
         uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:s3:path/${StatusListBucket}/{object}"
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:s3:path/${StatusListBucket}/t/{statusList}"
+        requestParameters:
+          integration.request.path.statusList: method.request.path.statusList
         responses:
           "200":
             statusCode: "200"
