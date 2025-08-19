@@ -233,7 +233,7 @@ Resources:
   IssueLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue-status-list-entry
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue
       RetentionInDays: 30
 
   RevokeFunction:
