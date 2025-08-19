@@ -56,6 +56,13 @@ paths:
       responses:
         "200":
           description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -94,7 +101,7 @@ paths:
                     ],
                 }
         "500":
-          description: "Internal Server Error"
+          description: Internal Server Error
       x-amazon-apigateway-integration:
         credentials:
           Fn::GetAtt: ["JsonWebKeysBucketApiRole", "Arn"]
@@ -104,13 +111,6 @@ paths:
           "200":
             statusCode: "200"
             description: OK
-            headers:
-              Content-Type:
-                schema:
-                  type: string
-              Cache-Control:
-                schema:
-                  type: string
             responseParameters:
               method.response.header.Content-Type: "'application/json'"
               method.response.header.Cache-Control: "'max-age=300'"
