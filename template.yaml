@@ -611,6 +611,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
+                  - s3:ListBucket
                 Resource:
                   - !Sub ${StatusListBucket.Arn}/*
       PermissionsBoundary: !If
@@ -676,6 +677,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
+                  - s3:ListBucket
                 Resource:
                   - !Sub ${JsonWebKeysBucket.Arn}/.well-known/jwks.json
       PermissionsBoundary: !If
