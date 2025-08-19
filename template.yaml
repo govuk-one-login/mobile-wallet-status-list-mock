@@ -212,8 +212,6 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-
-                  #                  - s3:ListBucket
                   - s3:GetObject
                   - s3:PutObject
                 Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-status-list/*
@@ -306,8 +304,6 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-
-                  #                  - s3:ListBucket
                   - s3:GetObject
                   - s3:PutObject
                 Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-status-list/*
@@ -611,7 +607,6 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
-                  - s3:ListBucket
                 Resource:
                   - !Sub ${StatusListBucket.Arn}/*
       PermissionsBoundary: !If
@@ -677,7 +672,6 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject
-                  - s3:ListBucket
                 Resource:
                   - !Sub ${JsonWebKeysBucket.Arn}/.well-known/jwks.json
       PermissionsBoundary: !If
