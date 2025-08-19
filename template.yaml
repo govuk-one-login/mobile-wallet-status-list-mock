@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Transform: AWS::Serverless-2016-10-31
+
 Description: Status List Mock
 
 Parameters:
@@ -7,6 +7,7 @@ Parameters:
     Description: The ARN of the Code Signing Config to use, provided by the deployment pipeline
     Type: String
     Default: none
+
   Environment:
     Description: The name of the environment to deploy to
     Type: String
@@ -14,11 +15,13 @@ Parameters:
       - dev
       - build
     Default: dev
+
   PermissionsBoundary:
     Description: |
       The ARN of the permissions boundary to apply to any role created by the template
     Type: String
     Default: none
+
   VpcStackName:
     Description: |
       The stack name of the VPC where the Lambda functions will be deployed
@@ -31,16 +34,19 @@ Mappings:
       LambdaLogLevel: DEBUG
     build:
       LambdaLogLevel: INFO
+
   EnvironmentConfiguration:
     dev:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
     build:
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+
   AccountAccess:
     dev:
       AccountId: arn:aws:iam::537124944731:root
     build:
       AccountId: arn:aws:iam::881490088364:root
+
   KMS:
     dev:
       PendingDeletionInDays: 7
@@ -52,10 +58,13 @@ Conditions:
     - !Equals
       - !Ref PermissionsBoundary
       - none
+
   UseCodeSigning: !Not
     - !Equals
       - !Ref CodeSigningConfigArn
       - none
+
+Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
@@ -203,7 +212,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-#                  - s3:ListBucket
+
+                  #                  - s3:ListBucket
                   - s3:GetObject
                   - s3:PutObject
                 Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-status-list/*
@@ -296,6 +306,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+
                   #                  - s3:ListBucket
                   - s3:GetObject
                   - s3:PutObject
@@ -379,21 +390,20 @@ Resources:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-private-api-access-logs
       RetentionInDays: 30
 
-#  PrivateApiBasePathMapping:
-#    Type: AWS::ApiGateway::BasePathMapping
-#    Properties:
-#      DomainName: !Ref PrivateApiDomainName
-#      RestApiId: !Ref PublicApi
-#      Stage: !Ref PrivateApi.Stage
+      #  PrivateApiBasePathMapping:
+      #    Type: AWS::ApiGateway::BasePathMapping
+      #    Properties:
+      #      DomainName: !Ref PrivateApiDomainName
+      #      RestApiId: !Ref PublicApi
+      #      Stage: !Ref PrivateApi.Stage
 
-#  PrivateApiDomainName:
-#    Type: AWS::ApiGateway::DomainName
-#    Properties:
+      #  PrivateApiDomainName:
+      #    Type: AWS::ApiGateway::DomainName
+      #    Properties:
 
-#  PrivateApiRecordSet:
-#    Type: AWS::Route53::RecordSet
-#    Properties:
-
+      #  PrivateApiRecordSet:
+      #    Type: AWS::Route53::RecordSet
+      #    Properties:
   PublicApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -426,21 +436,20 @@ Resources:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-public-api-access-logs
       RetentionInDays: 30
 
-#  PublicApiBasePathMapping:
-#    Type: AWS::ApiGateway::BasePathMapping
-#    Properties:
-#      DomainName: !Ref PublicApiDomainName
-#      RestApiId: !Ref PublicApi
-#      Stage: !Ref PublicApi.Stage
+      #  PublicApiBasePathMapping:
+      #    Type: AWS::ApiGateway::BasePathMapping
+      #    Properties:
+      #      DomainName: !Ref PublicApiDomainName
+      #      RestApiId: !Ref PublicApi
+      #      Stage: !Ref PublicApi.Stage
 
-#  PublicApiDomainName:
-#    Type: AWS::ApiGateway::DomainName
-#    Properties:
+      #  PublicApiDomainName:
+      #    Type: AWS::ApiGateway::DomainName
+      #    Properties:
 
-#  PublicApiRecordSet:
-#    Type: AWS::Route53::RecordSet
-#    Properties:
-
+      #  PublicApiRecordSet:
+      #    Type: AWS::Route53::RecordSet
+      #    Properties:
   JwksFunction:
     Type: AWS::Serverless::Function
     DependsOn:
