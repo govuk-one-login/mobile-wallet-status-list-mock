@@ -32,7 +32,7 @@ paths:
           description: "Internal Server Error"
       x-amazon-apigateway-integration:
         credentials:
-          Fn::GetAtt: [ "StatusListBucketApiRole", "Arn" ]
+          Fn::GetAtt: ["StatusListBucketApiRole", "Arn"]
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:s3:path/${StatusListBucket}/{object}"
         responses:
@@ -79,24 +79,25 @@ paths:
                         y:
                           type: string
               example:
-                    {
-                      "keys": [
-                        {
-                          "kty": "EC",
-                          "use": "sig",
-                          "crv": "P-256",
-                          "kid": "5dcbee863b5d7cc30c9ba1f7393dacc6c16610782e4b6a191f94a7e8b1e1510f",
-                          "x": "6jCKX_QRrmTeEJi-uiwcYqu8BgMgl70g2pdAst24MPE",
-                          "y": "icPzjbSk6apD_SNvQt8NWOPlPeGG4KYU55GfnARryoY",
-                          "alg": "ES256"
-                        }
-                      ]
-                    }
+                {
+                  "keys":
+                    [
+                      {
+                        "kty": "EC",
+                        "use": "sig",
+                        "crv": "P-256",
+                        "kid": "5dcbee863b5d7cc30c9ba1f7393dacc6c16610782e4b6a191f94a7e8b1e1510f",
+                        "x": "6jCKX_QRrmTeEJi-uiwcYqu8BgMgl70g2pdAst24MPE",
+                        "y": "icPzjbSk6apD_SNvQt8NWOPlPeGG4KYU55GfnARryoY",
+                        "alg": "ES256",
+                      },
+                    ],
+                }
         "500":
           description: "Internal Server Error"
       x-amazon-apigateway-integration:
         credentials:
-          Fn::GetAtt: [ "JsonWebKeysBucketApiRole", "Arn" ]
+          Fn::GetAtt: ["JsonWebKeysBucketApiRole", "Arn"]
         uri:
           Fn::Sub: "arn:aws:apigateway:${AWS::Region}:s3:path/${JsonWebKeysBucket}/.well-known/jwks.json"
         responses:
