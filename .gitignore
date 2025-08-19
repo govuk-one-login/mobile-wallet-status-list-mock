@@ -12,10 +12,6 @@ results/
 .DS_Store
 .idea
 
-# Temp Files
-deploy/.aws-sam/
-deploy/samconfig.toml
-
 # Ignore changes to .env
 .env
 

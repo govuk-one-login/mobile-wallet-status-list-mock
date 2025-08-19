@@ -28,37 +28,3 @@ nvm install
 ```
 nvm use
 ```
-
-## Quickstart
-
-### Install
-
-Install the dependencies with:
-```
-npm install
-```
-
-### Lint & Format
-
-Lint and format the code with:
-```
-npm run lint
-```
-
-```
-npm run format
-```
-
-### Build
-
-Build the assets with:
-```
-npm run build
-```
-
-### Test
-
-Unit test the code with:
-```
-npm run test
-```
