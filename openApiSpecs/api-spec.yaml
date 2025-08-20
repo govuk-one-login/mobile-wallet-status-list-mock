@@ -17,7 +17,7 @@ paths:
         required: true
       responses:
         "200":
-          description: Successful operation
+          description: OK
           content:
             application/json:
               schema:
@@ -28,9 +28,9 @@ paths:
                     example: 0
                   uri:
                     type: string
-                    example: "https://crs.account.gov.uk/b/A671FED3E9AD"
+                    example: "https://status-list-mock.mobile.{environment}.account.gov.uk/t/db6ac25a-bbd3-4b4a-b2d1-c75cb92d0ca6"
         "500":
-          description: "Internal Server Error"
+          description: Internal Server Error
       x-amazon-apigateway-integration:
         requestTemplates:
           application/json:
@@ -52,9 +52,9 @@ paths:
         required: true
       responses:
         "202":
-          description: Successful operation
+          description: Accepted
         "500":
-          description: "Internal Server Error"
+          description: Internal Server Error
       x-amazon-apigateway-integration:
         requestTemplates:
           application/json:
@@ -66,14 +66,14 @@ paths:
         type: "aws_proxy"
   /t/{statusList}:
     get:
-      description: Retrieve a status list.
+      description: Retrieve a status list
       parameters:
         - in: path
           name: statusList
           schema:
             type: string
           required: true
-          description: Status list identifier.
+          description: Status list identifier
       responses:
         "200":
           description: OK
@@ -90,7 +90,7 @@ paths:
                 type: string
                 example: "eyJ..."
         "500":
-          description: "Internal Server Error"
+          description: Internal Server Error
       x-amazon-apigateway-integration:
         credentials:
           Fn::GetAtt: ["StatusListBucketApiRole", "Arn"]
@@ -115,7 +115,7 @@ paths:
         type: "aws"
   /.well-known/jwks.json:
     get:
-      description: Retrieve the public keys in JWKS format.
+      description: Retrieve the public keys in JWKS format
       responses:
         "200":
           description: OK
