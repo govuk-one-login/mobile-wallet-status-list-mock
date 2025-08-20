@@ -33,7 +33,7 @@ Mappings:
     dev:
       LambdaLogLevel: DEBUG
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
-      SelfUrl: status-list-mock-2.mobile.dev.account.gov.uk
+      SelfUrl: status-list-mock.mobile.dev.account.gov.uk
     build:
       LambdaLogLevel: INFO
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
@@ -121,8 +121,8 @@ Resources:
   Api:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub ${AWS::StackName}-public-api
-      Description: Regional API gateway for Status List and JWKS
+      Name: !Sub ${AWS::StackName}-api
+      Description: Regional API gateway for the Status List Mock
       StageName: !Ref Environment
       OpenApiVersion: 3.0.0
       AccessLogSetting:
@@ -147,7 +147,7 @@ Resources:
   ApiAccessLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-public-api-access-logs
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-access-logs
       RetentionInDays: 30
 
   ApiBasePathMapping:
