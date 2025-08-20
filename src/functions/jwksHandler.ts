@@ -1,6 +1,5 @@
 import {
   APIGatewayProxyEvent,
-  APIGatewayProxyResult,
   Context,
 } from "aws-lambda";
 import { logger } from "../logging/logger";
