@@ -1,8 +1,69 @@
 openapi: 3.0.0
 info:
-  title: Status List Mock - API for Status List and JWKS
+  title: Status List Mock API
   version: 1.0.0
 paths:
+  /issue:
+    post:
+      tags:
+        - issue
+      description: Issue a new index
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "eyJ..."
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idx:
+                    type: integer
+                    example: 0
+                  uri:
+                    type: string
+                    example: "https://crs.account.gov.uk/b/A671FED3E9AD"
+        "500":
+          description: "Internal Server Error"
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/json:
+            statusCode: 200
+        httpMethod: "POST"
+        passthroughBehavior: "when_no_match"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${IssueFunction}:live/invocations"
+        type: "aws_proxy"
+  /revoke:
+    post:
+      description: Revoke an index
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "eyJ..."
+        required: true
+      responses:
+        "202":
+          description: Successful operation
+        "500":
+          description: "Internal Server Error"
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/json:
+            statusCode: 200
+        httpMethod: "POST"
+        passthroughBehavior: "when_no_match"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${RevokeFunction}:live/invocations"
+        type: "aws_proxy"
   /t/{statusList}:
     get:
       description: Retrieve a status list.
