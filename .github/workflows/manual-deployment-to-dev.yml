@@ -1,4 +1,4 @@
-name: Deploy to Dev
+name: Manual Deployment to Dev
 
 on:
   workflow_dispatch:
@@ -10,8 +10,8 @@ on:
         default: main
 
 jobs:
-  deploy-to-dev:
-    name: Deploy to dev
+  deploy:
+    name: Deploy
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
