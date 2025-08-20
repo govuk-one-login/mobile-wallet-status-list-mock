@@ -1,7 +1,4 @@
-import {
-  APIGatewayProxyEvent,
-  Context,
-} from "aws-lambda";
+import { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 
