@@ -192,6 +192,11 @@ Resources:
         EntryPoints:
           - src/functions/issueHandler.ts
     Properties:
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Revoke
+          STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
+          SIGNING_KEY_ID: !Ref SigningKey
       Events:
         IssueIndex:
           Type: Api
@@ -202,11 +207,6 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-issue
       Handler: src/functions/issueHandler.handler
       Role: !GetAtt IssueFunctionLambdaRole.Arn
-      Environment:
-        Variables:
-          POWERTOOLS_SERVICE_NAME: Issue
-          SIGNING_KEY: !Ref SigningKey
-          STATUS_LIST_BUCKET: !Ref StatusListBucket
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -304,6 +304,11 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-revoke
       Handler: src/functions/revokeHandler.handler
       Role: !GetAtt RevokeFunctionLambdaRole.Arn
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Revoke
+          STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
+          SIGNING_KEY_ID: !Ref SigningKey
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -315,11 +320,6 @@ Resources:
             Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
           - !ImportValue
             Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
-      Environment:
-        Variables:
-          POWERTOOLS_SERVICE_NAME: Revoke
-          STATUS_LIST_BUCKET: !Ref StatusListBucket
-          SIGNING_KEY: !Ref SigningKey
 
   RevokeFunctionLambdaRole:
     Type: AWS::IAM::Role
@@ -389,9 +389,9 @@ Resources:
     Properties:
       Environment:
         Variables:
-          SIGNING_KEY: !Ref SigningKey
+          POWERTOOLS_SERVICE_NAME: JWKS
+          SIGNING_KEY_ID: !Ref SigningKey
           JWKS_BUCKET_NAME: !Ref JwksBucket
-          JWKS_FILE_NAME: .well-known/jwks.json
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
