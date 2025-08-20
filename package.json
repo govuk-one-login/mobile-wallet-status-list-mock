@@ -6,7 +6,7 @@
     "node": "22"
   },
   "scripts": {
-    "test:unit": "./node_modules/.bin/jest --testPathPatterns=test/unit/ --silent",
+    "test": "./node_modules/.bin/jest --silent",
     "lint": "./node_modules/.bin/eslint ./src/functions",
     "format": "./node_modules/.bin/prettier --write '**/*.ts' 'openApiSpecs/*.yaml'",
     "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",
