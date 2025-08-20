@@ -1,6 +1,11 @@
 import { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
+import crypto from "node:crypto";
+import { JWK, JWKS } from "../types/jwks";
+import { getPublicKey } from "../common/aws/kms";
+import { getConfig } from "../config/getConfig";
+import { putObject } from "../common/aws/s3";
 
 export async function handler(
   event: APIGatewayProxyEvent,
@@ -8,5 +13,47 @@ export async function handler(
 ): Promise<void> {
   logger.addContext(context);
   logger.info(LogMessage.JWKS_LAMBDA_STARTED);
-  logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
+
+  try {
+    const config = getConfig(process.env);
+
+    const keyId = config.SIGNING_KEY_ID;
+    const spki = await getPublicKey(keyId);
+    const jwk: JWK = convertToJwk(spki, keyId);
+    const jwks: JWKS = { keys: [jwk] };
+
+    await putObject(
+      config.JWKS_BUCKET_NAME,
+      ".well-known/jwks.json",
+      JSON.stringify(jwks),
+    );
+
+    logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
+
+    return;
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.stack || error.message
+        : JSON.stringify(error);
+    throw new Error(`Unable to upload JWKS: ${message}`);
+  }
+}
+
+// Converts a DER-encoded SPKI to a JWK
+function convertToJwk(spki: Uint8Array<ArrayBufferLike>, keyId: string): JWK {
+  const publicKey: crypto.JsonWebKey = crypto
+    .createPublicKey({
+      key: spki as Buffer,
+      type: "spki",
+      format: "der",
+    })
+    .export({ format: "jwk" });
+
+  return {
+    ...publicKey,
+    use: "sig",
+    kid: crypto.createHash("sha256").update(keyId).digest().toString("hex"),
+    alg: "ES256",
+  } as JWK;
 }
