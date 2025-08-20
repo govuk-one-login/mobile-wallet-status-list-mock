@@ -4,15 +4,17 @@ import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default tseslint.config(
   eslint.configs.recommended,
-  tseslint.configs.recommended,
-  eslintConfigPrettier, // disables rules that conflict with prettier
+  ...tseslint.configs.recommended,
+  eslintConfigPrettier, // Disables ESLint rules that conflict with Prettier
   {
     rules: {
-      'no-unused-vars': 'off', // disabled as a duplicate with @typscript-eslint/no-unused-vars rule
+      // Turn off base ESLint rule to avoid conflicts with TypeScript version
+      'no-unused-vars': 'off',
+      // Use TypeScript-aware unused variables rule instead
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
-          argsIgnorePattern: "^_"
+          argsIgnorePattern: '^_' // Allow unused params prefixed with underscore (e.g., _context)
         }
       ]
     }
