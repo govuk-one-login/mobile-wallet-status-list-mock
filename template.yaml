@@ -142,7 +142,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: ./openApiSpecs/api-spec.yaml
+            Location: ./api-spec.yaml
 
   ApiAccessLogs:
     Type: AWS::Logs::LogGroup

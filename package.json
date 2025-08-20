@@ -8,7 +8,7 @@
   "scripts": {
     "test": "./node_modules/.bin/jest --silent",
     "lint": "./node_modules/.bin/eslint ./src/functions",
-    "format": "./node_modules/.bin/prettier --write '**/*.ts' 'openApiSpecs/*.yaml'",
+    "format": "./node_modules/.bin/prettier --write '**/*.ts' 'api-spec.yaml'",
     "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",
     "infra:format": "rain fmt --write template.yaml",
     "infra:format:check": "rain fmt --verify template.yaml"
