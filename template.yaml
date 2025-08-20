@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Transform: AWS::Serverless-2016-10-31
+
 Description: Status List Mock
 
 Parameters:
@@ -7,6 +7,7 @@ Parameters:
     Description: The ARN of the Code Signing Config to use, provided by the deployment pipeline
     Type: String
     Default: none
+
   Environment:
     Description: The name of the environment to deploy to
     Type: String
@@ -14,11 +15,13 @@ Parameters:
       - dev
       - build
     Default: dev
+
   PermissionsBoundary:
     Description: |
       The ARN of the permissions boundary to apply to any role created by the template
     Type: String
     Default: none
+
   VpcStackName:
     Description: |
       The stack name of the VPC where the Lambda functions will be deployed
@@ -46,6 +49,8 @@ Conditions:
     - !Equals
       - !Ref CodeSigningConfigArn
       - none
+
+Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
@@ -113,6 +118,68 @@ Globals:
             - DynatraceSecretArn
 
 Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${AWS::StackName}-public-api
+      Description: Regional API gateway for Status List and JWKS
+      StageName: !Ref Environment
+      OpenApiVersion: 3.0.0
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiAccessLogs.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+      EndpointConfiguration:
+        Type: REGIONAL
+      MethodSettings:
+        - LoggingLevel: INFO
+          ResourcePath: /*
+          HttpMethod: '*'
+          DataTraceEnabled: false
+          MetricsEnabled: true
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 10
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: ./openApiSpecs/api-spec.yaml
+
+  ApiAccessLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-public-api-access-logs
+      RetentionInDays: 30
+
+  ApiBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref ApiDomainName
+      RestApiId: !Ref Api
+      Stage: !Ref Api.Stage
+
+  ApiDomainName:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - SelfUrl
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      RegionalCertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
+      SecurityPolicy: TLS_1_2
+
+  ApiRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt ApiDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt ApiDomainName.RegionalHostedZoneId
+      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
+      Name: !Ref ApiDomainName
+      Type: A
+
   IssueFunction:
     Type: AWS::Serverless::Function
     DependsOn:
@@ -307,91 +374,6 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
       RetentionInDays: 30
 
-  SigningKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: KMS key for signing JWTs
-      Enabled: true
-      KeyUsage: SIGN_VERIFY
-      KeySpec: ECC_NIST_P256
-      EnableKeyRotation: false
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: kms:*
-            Resource: '*'
-
-  SigningKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub alias/${AWS::StackName}-SigningKey
-      TargetKeyId: !Ref SigningKey
-
-  ApiDomainName:
-    Type: AWS::ApiGateway::DomainName
-    Properties:
-      DomainName: !FindInMap
-        - EnvironmentVariables
-        - !Ref Environment
-        - SelfUrl
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-      RegionalCertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
-      SecurityPolicy: TLS_1_2
-
-  ApiRecordSet:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      AliasTarget:
-        DNSName: !GetAtt ApiDomainName.RegionalDomainName
-        HostedZoneId: !GetAtt ApiDomainName.RegionalHostedZoneId
-      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
-      Name: !Ref ApiDomainName
-      Type: A 
-
-  Api:
-    Type: AWS::Serverless::Api
-    Properties:
-      Name: !Sub ${AWS::StackName}-public-api
-      Description: Regional API gateway for Status List and JWKS
-      StageName: !Ref Environment
-      OpenApiVersion: 3.0.0
-      AccessLogSetting:
-        DestinationArn: !GetAtt ApiAccessLogs.Arn
-        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
-      EndpointConfiguration:
-        Type: REGIONAL
-      MethodSettings:
-        - LoggingLevel: INFO
-          ResourcePath: /*
-          HttpMethod: '*'
-          DataTraceEnabled: false
-          MetricsEnabled: true
-          ThrottlingBurstLimit: 10
-          ThrottlingRateLimit: 10
-      DefinitionBody:
-        Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: ./openApiSpecs/public-spec.yaml
-
-  ApiAccessLogs:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-public-api-access-logs
-      RetentionInDays: 30
-
-  ApiBasePathMapping:
-    Type: AWS::ApiGateway::BasePathMapping
-    Properties:
-      DomainName: !Ref ApiDomainName
-      RestApiId: !Ref Api
-      Stage: !Ref Api.Stage
-
   JwksFunction:
     Type: AWS::Serverless::Function
     DependsOn:
@@ -488,7 +470,71 @@ Resources:
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-  # Status List Bucket
+  JwksBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
+      VersioningConfiguration:
+        Status: Suspended
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue devplatform-s3-access-logs-bucket-S3AccessLogsBucketName
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
+
+  JwksBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref JwksBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Deny
+            Principal:
+              AWS: '*'
+            Action: '*'
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref JwksBucket
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  JwksBucketApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-jwks-bucket-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyName: JwksBucketPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub ${JwksBucket.Arn}/.well-known/jwks.json
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
   StatusListBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -560,67 +606,25 @@ Resources:
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-  JwksBucket:
-    Type: AWS::S3::Bucket
+  SigningKey:
+    Type: AWS::KMS::Key
     Properties:
-      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
-      VersioningConfiguration:
-        Status: Suspended
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      LoggingConfiguration:
-        DestinationBucketName: !ImportValue devplatform-s3-access-logs-bucket-S3AccessLogsBucketName
-        TargetObjectKeyFormat:
-          PartitionedPrefix:
-            PartitionDateSource: EventTime
-
-  JwksBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref JwksBucket
-      PolicyDocument:
+      Description: KMS key for signing JWTs
+      Enabled: true
+      KeyUsage: SIGN_VERIFY
+      KeySpec: ECC_NIST_P256
+      EnableKeyRotation: false
+      KeyPolicy:
         Version: "2012-10-17"
         Statement:
-          - Effect: Deny
+          - Effect: Allow
             Principal:
-              AWS: '*'
-            Action: '*'
-            Resource: !Sub
-              - arn:aws:s3:::${bucketName}/*
-              - bucketName: !Ref JwksBucket
-            Condition:
-              Bool:
-                aws:SecureTransport: false
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
 
-  JwksBucketApiRole:
-    Type: AWS::IAM::Role
+  SigningKeyAlias:
+    Type: AWS::KMS::Alias
     Properties:
-      RoleName: !Sub ${AWS::StackName}-jwks-bucket-role
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service: apigateway.amazonaws.com
-        Version: "2012-10-17"
-      Policies:
-        - PolicyName: JwksBucketPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                Resource:
-                  - !Sub ${JwksBucket.Arn}/.well-known/jwks.json
-      PermissionsBoundary: !If
-        - UsePermissionsBoundary
-        - !Ref PermissionsBoundary
-        - !Ref AWS::NoValue
+      AliasName: !Sub alias/${AWS::StackName}-SigningKey
+      TargetKeyId: !Ref SigningKey
