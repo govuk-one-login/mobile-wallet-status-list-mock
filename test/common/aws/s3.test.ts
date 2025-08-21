@@ -3,22 +3,22 @@ import { mockClient } from "aws-sdk-client-mock";
 import "aws-sdk-client-mock-jest";
 import { putObject } from "../../../src/common/aws/s3";
 
-const s3Mock = mockClient(S3Client);
+const mockS3Client = mockClient(S3Client);
 
 describe("putObject", () => {
   beforeEach(() => {
-    s3Mock.reset();
+    mockS3Client.reset();
   });
 
   it("should send PutObjectCommand with the correct parameters", async () => {
-    s3Mock.on(PutObjectCommand).resolves({});
+    mockS3Client.on(PutObjectCommand).resolves({});
     const bucket = "test-bucket-name";
     const key = "jwks.json";
     const body = '{"keys":[{}]}';
 
     await putObject(bucket, key, body);
 
-    expect(s3Mock).toHaveReceivedCommandWith(PutObjectCommand, {
+    expect(mockS3Client).toHaveReceivedCommandWith(PutObjectCommand, {
       Bucket: bucket,
       Key: key,
       Body: body,
@@ -27,7 +27,7 @@ describe("putObject", () => {
   });
 
   it("should propagates underlying errors from the S3 client", async () => {
-    s3Mock.on(PutObjectCommand).rejects(new Error("S3 error"));
+    mockS3Client.on(PutObjectCommand).rejects(new Error("S3 error"));
     const bucket = "test-bucket-name";
     const key = "jwks.json";
     const body = '{"keys":[{}]}';
