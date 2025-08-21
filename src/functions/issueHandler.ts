@@ -9,12 +9,12 @@ import { randomUUID } from "crypto";
 
 interface Configuration {
   index: number;
-  statusList: StatusList
+  statusList: StatusList;
 }
 
 interface StatusList {
   bits: number;
-  lst: string
+  lst: string;
 }
 
 const TTL = 259200;
@@ -30,8 +30,8 @@ export async function handler(
 
   const header = buildHeader(process.env.SIGNING_KEY_ID!);
   const objectKey = randomUUID();
-  const uri = `${process.env.SELF_URL}/t/${objectKey}`
-  const payload = buildPayload(config.statusList, uri)
+  const uri = `${process.env.SELF_URL}/t/${objectKey}`;
+  const payload = buildPayload(config.statusList, uri);
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
@@ -62,8 +62,10 @@ function getRandomConfig(): Configuration {
 
 function buildHeader(keyId: string) {
   return {
-    alg: "ES256", kid: keyId, typ: "statuslist+jwt",
-  }
+    alg: "ES256",
+    kid: keyId,
+    typ: "statuslist+jwt",
+  };
 }
 
 function buildPayload(statusList: StatusList, uri: string) {
@@ -73,6 +75,10 @@ function buildPayload(statusList: StatusList, uri: string) {
     exp: timestamp + TTL,
     status_list: statusList,
     sub: uri,
-    ttl: TTL
-  }
+    ttl: TTL,
+  };
+}
+
+function base64Encoder(object: object) {
+  return Buffer.from(JSON.stringify(object)).toString("base64");
 }
