@@ -11,11 +11,11 @@ export async function handler(
   context: Context,
 ): Promise<APIGatewayProxyResult> {
   logger.addContext(context);
-  logger.info(LogMessage.REVOKE_LAMBDA_STARTED);
+  logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
 
   const config = getRandomConfig();
 
-  logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
+  logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
   return {
     statusCode: 200,
