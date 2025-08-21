@@ -12,13 +12,32 @@ export async function handler(
 ): Promise<APIGatewayProxyResult> {
   logger.addContext(context);
   logger.info(LogMessage.REVOKE_LAMBDA_STARTED);
+
+  const config = getRandomConfig();
+
   logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
+
   return {
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      idx: 0,
+      idx: config.index,
       uri: "uri",
     }),
   };
+}
+
+function getRandomConfig() {
+  const configurations = [
+    { index: 0, statusList: { bits: 2, lst: "eNpzcAEAAMYAhQ" } },
+    {
+      index: 5,
+      statusList: {
+        bits: 2,
+        lst: "eNqTSwYAAKEAgg",
+      },
+    },
+  ];
+
+  return configurations[Math.floor(Math.random() * configurations.length)];
 }

@@ -10,6 +10,8 @@ jest.mock("../../src/logging/logger", () => ({
   },
 }));
 
+jest.spyOn(Math, "random").mockReturnValue(0);
+
 describe("handler", () => {
   const mockEvent = {} as APIGatewayProxyEvent;
   const mockContext = {} as Context;
