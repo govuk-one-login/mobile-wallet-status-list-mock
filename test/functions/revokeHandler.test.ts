@@ -36,8 +36,10 @@ describe("handler", () => {
       }),
     });
     expect(logger.addContext).toHaveBeenCalledWith(mockContext);
-    expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_STARTED);
-    expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_COMPLETED);
+    expect(logger.info).toHaveBeenCalledWith(LogMessage.REVOKE_LAMBDA_STARTED);
+    expect(logger.info).toHaveBeenCalledWith(
+      LogMessage.REVOKE_LAMBDA_COMPLETED,
+    );
     expect(logger.info).toHaveBeenCalledTimes(2);
     expect(Date.now).toHaveBeenCalledTimes(1);
   });
