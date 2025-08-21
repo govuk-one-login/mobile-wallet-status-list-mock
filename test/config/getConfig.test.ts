@@ -7,8 +7,38 @@ describe("getConfig", () => {
     STATUS_LIST_BUCKET_NAME: "test-status-bucket-name",
   };
 
-  it("should return a valid config when all required env vars are present", () => {
-    const config = getConfig(validEnv as NodeJS.ProcessEnv);
+  it("should return config with single required field", () => {
+    const config = getConfig(
+      validEnv as NodeJS.ProcessEnv,
+      ["SIGNING_KEY_ID"] as const,
+    );
+
+    expect(config).toEqual({
+      SIGNING_KEY_ID: "test-key-id",
+    });
+  });
+
+  it("should return config with multiple required fields", () => {
+    const config = getConfig(
+      validEnv as NodeJS.ProcessEnv,
+      ["SIGNING_KEY_ID", "JWKS_BUCKET_NAME"] as const,
+    );
+
+    expect(config).toEqual({
+      SIGNING_KEY_ID: "test-key-id",
+      JWKS_BUCKET_NAME: "test-jwks-bucket-name",
+    });
+  });
+
+  it("should return config with all fields", () => {
+    const config = getConfig(
+      validEnv as NodeJS.ProcessEnv,
+      [
+        "SIGNING_KEY_ID",
+        "JWKS_BUCKET_NAME",
+        "STATUS_LIST_BUCKET_NAME",
+      ] as const,
+    );
 
     expect(config).toEqual<Config>({
       SIGNING_KEY_ID: "test-key-id",
@@ -17,27 +47,72 @@ describe("getConfig", () => {
     });
   });
 
-  it("should throw error listing all missing env vars in the error message", () => {
-    const incompleteEnv = {
+  it("should handle empty required fields array", () => {
+    const config = getConfig(validEnv as NodeJS.ProcessEnv, []);
+
+    expect(config).toEqual({});
+  });
+
+  it("should not throw error for missing env vars that are not required", () => {
+    const partialEnv = {
+      SIGNING_KEY_ID: "test-key-id",
+      // Other fields missing but not required
+    };
+
+    const config = getConfig(
+      partialEnv as NodeJS.ProcessEnv,
+      ["SIGNING_KEY_ID"] as const,
+    );
+
+    expect(config).toEqual({
+      SIGNING_KEY_ID: "test-key-id",
+    });
+  });
+
+  it("should throw error for single missing required env var", () => {
+    const missingOneEnv = {
+      JWKS_BUCKET_NAME: "test-jwks-bucket-name",
+      STATUS_LIST_BUCKET_NAME: "test-status-bucket-name",
+      // SIGNING_KEY_ID missing
+    };
+
+    expect(() => {
+      getConfig(
+        missingOneEnv as NodeJS.ProcessEnv,
+        ["SIGNING_KEY_ID"] as const,
+      );
+    }).toThrow("Missing required env vars: SIGNING_KEY_ID");
+  });
+
+  it("should throw error for multiple missing required env vars", () => {
+    const missingMultipleEnv = {
       SIGNING_KEY_ID: "test-key-id",
       // JWKS_BUCKET_NAME missing
       // STATUS_LIST_BUCKET_NAME missing
     };
 
-    expect(() => getConfig(incompleteEnv as NodeJS.ProcessEnv)).toThrow(
+    expect(() => {
+      getConfig(
+        missingMultipleEnv as NodeJS.ProcessEnv,
+        [
+          "SIGNING_KEY_ID",
+          "JWKS_BUCKET_NAME",
+          "STATUS_LIST_BUCKET_NAME",
+        ] as const,
+      );
+    }).toThrow(
       "Missing required env vars: JWKS_BUCKET_NAME, STATUS_LIST_BUCKET_NAME",
     );
   });
 
-  it("should throw error if a single required env var is missing", () => {
-    const missingOneEnv = {
-      SIGNING_KEY_ID: "test-key-id",
+  it("should throw error when env var is falsy (undefined)", () => {
+    const undefinedEnv = {
+      SIGNING_KEY_ID: undefined,
       JWKS_BUCKET_NAME: "test-jwks-bucket-name",
-      // STATUS_LIST_BUCKET_NAME missing
     };
 
-    expect(() => getConfig(missingOneEnv as NodeJS.ProcessEnv)).toThrow(
-      "Missing required env vars: STATUS_LIST_BUCKET_NAME",
-    );
+    expect(() => {
+      getConfig(undefinedEnv as NodeJS.ProcessEnv, ["SIGNING_KEY_ID"] as const);
+    }).toThrow("Missing required env vars: SIGNING_KEY_ID");
   });
 });

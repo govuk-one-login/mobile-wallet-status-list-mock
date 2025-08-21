@@ -7,6 +7,8 @@ import { getPublicKey } from "../common/aws/kms";
 import { getConfig } from "../config/getConfig";
 import { putObject } from "../common/aws/s3";
 
+const REQUIRED_ENV_VARS = ["SIGNING_KEY_ID", "JWKS_BUCKET_NAME"] as const;
+
 export async function handler(
   event: APIGatewayProxyEvent,
   context: Context,
@@ -15,7 +17,7 @@ export async function handler(
   logger.info(LogMessage.JWKS_LAMBDA_STARTED);
 
   try {
-    const config = getConfig(process.env);
+    const config = getConfig(process.env, REQUIRED_ENV_VARS);
 
     const keyId = config.SIGNING_KEY_ID;
     const spki = await getPublicKey(keyId);

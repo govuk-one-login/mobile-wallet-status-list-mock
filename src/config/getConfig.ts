@@ -4,21 +4,20 @@ export interface Config {
   STATUS_LIST_BUCKET_NAME: string;
 }
 
-const REQUIRED_ENV_VARS = [
-  "SIGNING_KEY_ID",
-  "JWKS_BUCKET_NAME",
-  "STATUS_LIST_BUCKET_NAME",
-] as const;
-
-export function getConfig(env: NodeJS.ProcessEnv): Config {
-  const missing = REQUIRED_ENV_VARS.filter((key) => !env[key]);
+export function getConfig<T extends keyof Config>(
+  env: NodeJS.ProcessEnv,
+  requiredFields: readonly T[],
+): Pick<Config, T> {
+  const missing = requiredFields.filter((key) => !env[key]);
 
   if (missing.length > 0) {
     throw new Error(`Missing required env vars: ${missing.join(", ")}`);
   }
-  return {
-    SIGNING_KEY_ID: env.SIGNING_KEY_ID as string,
-    JWKS_BUCKET_NAME: env.JWKS_BUCKET_NAME as string,
-    STATUS_LIST_BUCKET_NAME: env.STATUS_LIST_BUCKET_NAME as string,
-  };
+
+  const config: Partial<Config> = {};
+  for (const field of requiredFields) {
+    config[field] = env[field] as string;
+  }
+
+  return config as Pick<Config, T>;
 }

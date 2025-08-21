@@ -36,14 +36,12 @@ describe("handler", () => {
   const mockConfig = {
     SIGNING_KEY_ID: "test-key-id",
     JWKS_BUCKET_NAME: "test-jwks-bucket-name",
-    STATUS_LIST_BUCKET_NAME: "test-status-bucket-name",
   };
   const mockSpki = new Uint8Array([1, 2, 3]);
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    jest.mocked(getConfig).mockReturnValue(mockConfig);
+    jest.mocked(getConfig).mockReturnValue(mockConfig as any);
     jest.mocked(getPublicKey).mockResolvedValue(mockSpki);
     jest.mocked(putObject).mockResolvedValue(undefined);
   });
@@ -54,7 +52,10 @@ describe("handler", () => {
     expect(logger.addContext).toHaveBeenCalledWith(context);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.JWKS_LAMBDA_STARTED);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.JWKS_LAMBDA_COMPLETED);
-    expect(getConfig).toHaveBeenCalledWith(process.env);
+    expect(getConfig).toHaveBeenCalledWith(process.env, [
+      "SIGNING_KEY_ID",
+      "JWKS_BUCKET_NAME",
+    ]);
     expect(getPublicKey).toHaveBeenCalledWith(mockConfig.SIGNING_KEY_ID);
     expect(putObject).toHaveBeenCalledWith(
       mockConfig.JWKS_BUCKET_NAME,
