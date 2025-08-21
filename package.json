@@ -29,6 +29,8 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.24.1",
+    "@aws-sdk/client-kms": "^3.872.0",
+    "aws-sdk-client-mock": "^4.1.0",
     "esbuild": "^0.25.8",
     "tsc": "^2.0.4"
   }
