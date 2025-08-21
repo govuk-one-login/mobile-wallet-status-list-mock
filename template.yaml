@@ -194,7 +194,7 @@ Resources:
     Properties:
       Environment:
         Variables:
-          POWERTOOLS_SERVICE_NAME: Revoke
+          POWERTOOLS_SERVICE_NAME: Issue
           STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
           SIGNING_KEY_ID: !Ref SigningKey
       Events:
