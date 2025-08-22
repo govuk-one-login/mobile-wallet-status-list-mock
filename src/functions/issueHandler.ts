@@ -63,18 +63,18 @@ function getRandomConfig(): Configuration {
 }
 
 async function createToken(statusList: StatusList, uri: string, keyId: string) {
-    const header = buildHeader(keyId);
-    const payload = buildPayload(statusList, uri);
+  const header = buildHeader(keyId);
+  const payload = buildPayload(statusList, uri);
 
-    const encodedHeader = base64Encoder(JSON.stringify(header));
-    const encodedPayload = base64Encoder(JSON.stringify(payload));
+  const encodedHeader = base64Encoder(JSON.stringify(header));
+  const encodedPayload = base64Encoder(JSON.stringify(payload));
 
-    const message = `${encodedHeader}.${encodedPayload}`;
+  const message = `${encodedHeader}.${encodedPayload}`;
 
-    const signature = await sign(message, keyId);
-    const encodedSignature = base64Encoder(signature);
+  const signature = await sign(message, keyId);
+  const encodedSignature = base64Encoder(signature);
 
-    return `${message}.${encodedSignature}`;
+  return `${message}.${encodedSignature}`;
 }
 
 function buildHeader(keyId: string) {
