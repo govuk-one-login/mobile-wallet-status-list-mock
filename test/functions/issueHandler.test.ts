@@ -3,7 +3,9 @@ import { handler } from "../../src/functions/issueHandler";
 import { logger } from "../../src/logging/logger";
 import { LogMessage } from "../../src/logging/LogMessage";
 import * as crypto from "crypto";
+import { sign } from "../../src/common/aws/kms";
 
+jest.mock("../../src/common/aws/kms");
 jest.mock("crypto");
 jest.mock("../../src/logging/logger", () => ({
   logger: {
@@ -26,11 +28,11 @@ describe("handler", () => {
       .spyOn(crypto, "randomUUID")
       .mockReturnValue("36940190-e6af-42d0-9181-74c944dc4af7");
     jest.spyOn(global.Date, "now").mockReturnValue(Date.parse("2025-08-21"));
+    jest.mocked(sign).mockResolvedValue(new Uint8Array([1, 2, 3]));
   });
 
   it("should return 200 response with expected body", async () => {
     const result = await handler(mockEvent, mockContext);
-
     expect(result).toEqual({
       statusCode: 200,
       headers: { "Content-Type": "application/json" },

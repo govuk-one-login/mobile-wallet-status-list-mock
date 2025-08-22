@@ -6,6 +6,7 @@ import {
 import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { randomUUID } from "crypto";
+import { sign } from "../common/aws/kms";
 
 interface Configuration {
   index: number;
@@ -32,6 +33,16 @@ export async function handler(
   const objectKey = randomUUID();
   const uri = `${process.env.SELF_URL}/t/${objectKey}`;
   const payload = buildPayload(config.statusList, uri);
+
+  const encodedHeader = base64Encoder(JSON.stringify(header));
+  const encodedPayload = base64Encoder(JSON.stringify(payload));
+
+  const message = `${encodedHeader}.${encodedPayload}`;
+  const keyId = process.env.SIGNING_KEY_ID;
+  const signature = await sign(message, keyId!);
+  const encodedSignature = base64Encoder(signature);
+
+  const token = `${message}.${encodedSignature}`;
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
@@ -79,6 +90,6 @@ function buildPayload(statusList: StatusList, uri: string) {
   };
 }
 
-function base64Encoder(object: object) {
-  return Buffer.from(JSON.stringify(object)).toString("base64");
+function base64Encoder(data: string | Uint8Array<ArrayBufferLike>) {
+  return Buffer.from(data).toString("base64url");
 }
