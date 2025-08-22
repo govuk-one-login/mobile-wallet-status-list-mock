@@ -7,6 +7,7 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { randomUUID } from "crypto";
 import { sign } from "../common/aws/kms";
+import { upload } from "../common/aws/s3";
 
 interface Configuration {
   index: number;
@@ -21,28 +22,18 @@ interface StatusList {
 const TTL = 259200;
 
 export async function handler(
-  event: APIGatewayProxyEvent,
+  _event: APIGatewayProxyEvent,
   context: Context,
 ): Promise<APIGatewayProxyResult> {
   logger.addContext(context);
   logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
 
   const config = getRandomConfig();
-
-  const header = buildHeader(process.env.SIGNING_KEY_ID!);
   const objectKey = randomUUID();
   const uri = `${process.env.SELF_URL}/t/${objectKey}`;
-  const payload = buildPayload(config.statusList, uri);
-
-  const encodedHeader = base64Encoder(JSON.stringify(header));
-  const encodedPayload = base64Encoder(JSON.stringify(payload));
-
-  const message = `${encodedHeader}.${encodedPayload}`;
-  const keyId = process.env.SIGNING_KEY_ID;
-  const signature = await sign(message, keyId!);
-  const encodedSignature = base64Encoder(signature);
-
-  const token = `${message}.${encodedSignature}`;
+  const keyId = process.env.SIGNING_KEY_ID!;
+  const token = await createToken(config.statusList, uri, keyId);
+  await upload(token, process.env.STATUS_LIST_BUCKET_NAME!, objectKey);
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
@@ -69,6 +60,21 @@ function getRandomConfig(): Configuration {
   ];
 
   return configurations[Math.floor(Math.random() * configurations.length)];
+}
+
+async function createToken(statusList: StatusList, uri: string, keyId: string) {
+    const header = buildHeader(keyId);
+    const payload = buildPayload(statusList, uri);
+
+    const encodedHeader = base64Encoder(JSON.stringify(header));
+    const encodedPayload = base64Encoder(JSON.stringify(payload));
+
+    const message = `${encodedHeader}.${encodedPayload}`;
+
+    const signature = await sign(message, keyId);
+    const encodedSignature = base64Encoder(signature);
+
+    return `${message}.${encodedSignature}`;
 }
 
 function buildHeader(keyId: string) {

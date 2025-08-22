@@ -6,7 +6,7 @@ const s3Client = mockClient(S3Client);
 
 const bucket = "bucketName";
 const body = "token";
-const key = "keyId";
+const key = "key";
 
 describe("upload", () => {
   it("should upload the token in s3 bucket", async () => {
