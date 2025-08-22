@@ -11,15 +11,15 @@ jest.mock("../../src/logging/logger", () => ({
 }));
 
 describe("handler", () => {
-  const mockEvent = {} as APIGatewayProxyEvent;
-  const mockContext = {} as Context;
+  const event = {} as APIGatewayProxyEvent;
+  const context = {} as Context;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("should return 200 response with expected body", async () => {
-    const result = await handler(mockEvent, mockContext);
+    const result = await handler(event, context);
 
     expect(result).toEqual({
       statusCode: 200,
@@ -29,7 +29,7 @@ describe("handler", () => {
         uri: "uri",
       }),
     });
-    expect(logger.addContext).toHaveBeenCalledWith(mockContext);
+    expect(logger.addContext).toHaveBeenCalledWith(context);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_STARTED);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_COMPLETED);
     expect(logger.info).toHaveBeenCalledTimes(2);
