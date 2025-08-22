@@ -2,7 +2,10 @@ import { KMSClient, SignCommand, SignCommandInput } from "@aws-sdk/client-kms"; 
 
 const client = new KMSClient();
 
-export async function sign(message: string, keyId: string) {
+export async function sign(
+  message: string,
+  keyId: string,
+): Promise<Uint8Array<ArrayBufferLike>> {
   const input: SignCommandInput = {
     KeyId: keyId,
     Message: Buffer.from(message),
@@ -11,5 +14,10 @@ export async function sign(message: string, keyId: string) {
   };
   const command = new SignCommand(input);
   const response = await client.send(command);
+
+  if (!response.Signature) {
+    throw Error("No Signature returned");
+  }
+
   return response.Signature;
 }
