@@ -15,4 +15,9 @@ results/
 # Ignore changes to .env
 .env
 
+# IntelliJ IDEA
 *.iml
+
+# AWS SAM
+.aws-sam
+samconfig.toml

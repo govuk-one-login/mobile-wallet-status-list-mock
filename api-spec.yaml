@@ -1,0 +1,187 @@
+openapi: 3.0.0
+info:
+  title: Status List Mock API
+  version: 1.0.0
+paths:
+  /issue:
+    post:
+      tags:
+        - issue
+      description: Issue a new index
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "eyJ..."
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  idx:
+                    type: integer
+                    example: 0
+                  uri:
+                    type: string
+                    example: "https://status-list-mock.mobile.{environment}.account.gov.uk/t/db6ac25a-bbd3-4b4a-b2d1-c75cb92d0ca6"
+        "500":
+          description: Internal Server Error
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/json:
+            statusCode: 200
+        httpMethod: "POST"
+        passthroughBehavior: "when_no_match"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${IssueFunction}:live/invocations"
+        type: "aws_proxy"
+  /revoke:
+    post:
+      description: Revoke an index
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: "eyJ..."
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: Internal Server Error
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/json:
+            statusCode: 200
+        httpMethod: "POST"
+        passthroughBehavior: "when_no_match"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${RevokeFunction}:live/invocations"
+        type: "aws_proxy"
+  /t/{statusList}:
+    get:
+      description: Retrieve a status list
+      parameters:
+        - in: path
+          name: statusList
+          schema:
+            type: string
+          required: true
+          description: Status list identifier
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "eyJ..."
+        "500":
+          description: Internal Server Error
+      x-amazon-apigateway-integration:
+        credentials:
+          Fn::GetAtt: ["StatusListBucketApiRole", "Arn"]
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:s3:path/${StatusListBucket}/t/{statusList}"
+        requestParameters:
+          integration.request.path.statusList: method.request.path.statusList
+        responses:
+          "200":
+            statusCode: "200"
+            description: OK
+            responseParameters:
+              method.response.header.Content-Type: "'application/json'"
+              method.response.header.Cache-Control: "'max-age=259200'"
+            contentHandling: "CONVERT_TO_TEXT"
+          default:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Content-Type: "'text/plain'"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "GET"
+        type: "aws"
+  /.well-known/jwks.json:
+    get:
+      description: Retrieve the public keys in JWKS format
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Type:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kid:
+                          type: string
+                        kty:
+                          type: string
+                        alg:
+                          type: string
+                        use:
+                          type: string
+                        x:
+                          type: string
+                        y:
+                          type: string
+              example:
+                {
+                  "keys":
+                    [
+                      {
+                        "kty": "EC",
+                        "use": "sig",
+                        "crv": "P-256",
+                        "kid": "5dcbee863b5d7cc30c9ba1f7393dacc6c16610782e4b6a191f94a7e8b1e1510f",
+                        "x": "6jCKX_QRrmTeEJi-uiwcYqu8BgMgl70g2pdAst24MPE",
+                        "y": "icPzjbSk6apD_SNvQt8NWOPlPeGG4KYU55GfnARryoY",
+                        "alg": "ES256",
+                      },
+                    ],
+                }
+        "500":
+          description: Internal Server Error
+      x-amazon-apigateway-integration:
+        credentials:
+          Fn::GetAtt: ["JwksBucketApiRole", "Arn"]
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:s3:path/${JwksBucket}/.well-known/jwks.json"
+        responses:
+          "200":
+            statusCode: "200"
+            description: OK
+            responseParameters:
+              method.response.header.Content-Type: "'application/json'"
+              method.response.header.Cache-Control: "'max-age=300'"
+            contentHandling: "CONVERT_TO_TEXT"
+          default:
+            statusCode: "500"
+            responseParameters:
+              method.response.header.Content-Type: "'text/plain'"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "GET"
+        type: "aws"
