@@ -55,7 +55,7 @@ jobs:
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
           sam validate
 
-      - name: Validate SAM build
+      - name: Build SAM template
         run: sam build --parallel
 
       - name: SonarQube Scan
