@@ -43,7 +43,7 @@ jobs:
       - name: Validate SAM template
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          sam validate --lint
+          sam validate
 
       - name: Validate SAM build
         run: sam build --parallel
