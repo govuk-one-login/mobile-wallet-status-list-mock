@@ -24,10 +24,6 @@ jest.mock("crypto", () => ({
       y: "yyy",
     })),
   })),
-  createHash: jest.fn(() => ({
-    update: jest.fn().mockReturnThis(),
-    digest: jest.fn(() => Buffer.from("abcdef123456", "hex")),
-  })),
 }));
 
 describe("handler", () => {
@@ -60,7 +56,7 @@ describe("handler", () => {
     expect(putObject).toHaveBeenCalledWith(
       mockConfig.JWKS_BUCKET_NAME,
       ".well-known/jwks.json",
-      '{"keys":[{"kty":"EC","crv":"P-256","x":"xxx","y":"yyy","use":"sig","kid":"abcdef123456","alg":"ES256"}]}',
+      '{"keys":[{"kty":"EC","crv":"P-256","x":"xxx","y":"yyy","use":"sig","kid":"test-key-id","alg":"ES256"}]}',
     );
   });
 
