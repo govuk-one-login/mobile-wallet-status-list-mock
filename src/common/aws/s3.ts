@@ -7,7 +7,7 @@ export async function putObject(
   key: string,
   body: string,
 ): Promise<void> {
-  const putObjectCommand = new PutObjectCommand({
+  const putObjectCommand: PutObjectCommand = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
     Body: body,
