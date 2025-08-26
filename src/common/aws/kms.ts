@@ -14,9 +14,9 @@ export async function getPublicKey(
   });
   const getPublicKeyCommandOutput: GetPublicKeyCommandOutput =
     await kmsClient.send(getPublicKeyCommand);
-  const spki = getPublicKeyCommandOutput.PublicKey;
-  if (spki === undefined) {
+  const publicKey = getPublicKeyCommandOutput.PublicKey;
+  if (publicKey === undefined) {
     throw new Error("Invalid public key");
   }
-  return spki;
+  return publicKey;
 }

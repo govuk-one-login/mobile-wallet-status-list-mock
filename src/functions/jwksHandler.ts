@@ -19,8 +19,8 @@ export async function handler(
   const config = getConfig(process.env, REQUIRED_ENV_VARS);
 
   const keyId = config.SIGNING_KEY_ID;
-  const spki = await getPublicKey(keyId);
-  const jwk: JWK = convertToJwk(spki, keyId);
+  const publicKey = await getPublicKey(keyId);
+  const jwk: JWK = convertToJwk(publicKey, keyId);
   const jwks: JWKS = { keys: [jwk] };
 
   await putObject(
@@ -32,7 +32,6 @@ export async function handler(
   logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
 }
 
-// Converts a DER-encoded SPKI to a JWK
 function convertToJwk(spki: Uint8Array<ArrayBufferLike>, keyId: string): JWK {
   const publicKey: crypto.JsonWebKey = crypto
     .createPublicKey({
