@@ -30,8 +30,6 @@ export async function handler(
   );
 
   logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
-
-  return;
 }
 
 // Converts a DER-encoded SPKI to a JWK
