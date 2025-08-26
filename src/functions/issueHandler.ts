@@ -8,6 +8,7 @@ import { LogMessage } from "../logging/LogMessage";
 import { randomUUID } from "crypto";
 import { sign } from "../common/aws/kms";
 import { upload } from "../common/aws/s3";
+import format from "ecdsa-sig-formatter";
 
 interface Configuration {
   index: number;
@@ -62,7 +63,11 @@ function getRandomConfig(): Configuration {
   return configurations[Math.floor(Math.random() * configurations.length)];
 }
 
-async function createToken(statusList: StatusList, uri: string, keyId: string) {
+export async function createToken(
+  statusList: StatusList,
+  uri: string,
+  keyId: string,
+) {
   const header = buildHeader(keyId);
   const payload = buildPayload(statusList, uri);
 
@@ -72,9 +77,10 @@ async function createToken(statusList: StatusList, uri: string, keyId: string) {
   const message = `${encodedHeader}.${encodedPayload}`;
 
   const signature = await sign(message, keyId);
-  const encodedSignature = base64Encoder(signature);
+  const signature64Encoded = base64Encoder(signature);
+  const signatureJose = format.derToJose(signature64Encoded, "ES256");
 
-  return `${message}.${encodedSignature}`;
+  return `${message}.${signatureJose}`;
 }
 
 function buildHeader(keyId: string) {
