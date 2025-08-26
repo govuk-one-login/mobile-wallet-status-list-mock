@@ -20,7 +20,7 @@ interface StatusList {
   lst: string;
 }
 
-const TTL = 259200;
+const TTL = 2592000;
 
 export async function handler(
   _event: APIGatewayProxyEvent,
