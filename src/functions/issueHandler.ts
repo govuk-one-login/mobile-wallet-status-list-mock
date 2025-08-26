@@ -60,7 +60,12 @@ function getRandomConfig(): Configuration {
     },
   ];
 
-  return configurations[Math.floor(Math.random() * configurations.length)];
+  // Generate a cryptographically secure random number
+  const randomBuffer = crypto.getRandomValues(new Uint8Array(1));
+  const randomNumber = randomBuffer[0] / (0xffffffff + 1); // Normalize to [0, 1)
+
+  const index = Math.floor(randomNumber * configurations.length);
+  return configurations[index];
 }
 
 export async function createToken(
