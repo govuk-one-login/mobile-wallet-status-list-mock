@@ -10,36 +10,28 @@ import { putObject } from "../common/aws/s3";
 const REQUIRED_ENV_VARS = ["SIGNING_KEY_ID", "JWKS_BUCKET_NAME"] as const;
 
 export async function handler(
-  event: APIGatewayProxyEvent,
+  _event: APIGatewayProxyEvent,
   context: Context,
 ): Promise<void> {
   logger.addContext(context);
   logger.info(LogMessage.JWKS_LAMBDA_STARTED);
 
-  try {
-    const config = getConfig(process.env, REQUIRED_ENV_VARS);
+  const config = getConfig(process.env, REQUIRED_ENV_VARS);
 
-    const keyId = config.SIGNING_KEY_ID;
-    const spki = await getPublicKey(keyId);
-    const jwk: JWK = convertToJwk(spki, keyId);
-    const jwks: JWKS = { keys: [jwk] };
+  const keyId = config.SIGNING_KEY_ID;
+  const spki = await getPublicKey(keyId);
+  const jwk: JWK = convertToJwk(spki, keyId);
+  const jwks: JWKS = { keys: [jwk] };
 
-    await putObject(
-      config.JWKS_BUCKET_NAME,
-      ".well-known/jwks.json",
-      JSON.stringify(jwks),
-    );
+  await putObject(
+    config.JWKS_BUCKET_NAME,
+    ".well-known/jwks.json",
+    JSON.stringify(jwks),
+  );
 
-    logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
+  logger.info(LogMessage.JWKS_LAMBDA_COMPLETED);
 
-    return;
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.stack || error.message
-        : JSON.stringify(error);
-    throw new Error(`Unable to upload JWKS: ${message}`);
-  }
+  return;
 }
 
 // Converts a DER-encoded SPKI to a JWK
