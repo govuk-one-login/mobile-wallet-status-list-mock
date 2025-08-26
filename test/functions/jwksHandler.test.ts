@@ -64,29 +64,23 @@ describe("handler", () => {
     );
   });
 
-  it("should throw if getConfig throws", async () => {
+  it("should propagate errors from getConfig", async () => {
     jest.mocked(getConfig).mockImplementation(() => {
       throw new Error("Missing env var");
     });
 
-    await expect(handler(event, context)).rejects.toThrow(
-      "Unable to upload JWKS",
-    );
+    await expect(handler(event, context)).rejects.toThrow("Missing env var");
   });
 
-  it("should throw if getPublicKey throws", async () => {
+  it("should propagate errors from getPublicKey", async () => {
     jest.mocked(getPublicKey).mockRejectedValue(new Error("KMS error"));
 
-    await expect(handler(event, context)).rejects.toThrow(
-      "Unable to upload JWKS",
-    );
+    await expect(handler(event, context)).rejects.toThrow("KMS error");
   });
 
-  it("should throw if putObject throws", async () => {
+  it("should propagate errors from putObject", async () => {
     jest.mocked(putObject).mockRejectedValue(new Error("S3 error"));
 
-    await expect(handler(event, context)).rejects.toThrow(
-      "Unable to upload JWKS",
-    );
+    await expect(handler(event, context)).rejects.toThrow("S3 error");
   });
 });
