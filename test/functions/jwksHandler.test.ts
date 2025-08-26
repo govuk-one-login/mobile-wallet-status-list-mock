@@ -11,18 +11,18 @@ jest.mock("../../src/logging/logger", () => ({
 }));
 
 describe("handler", () => {
-  const mockEvent = {} as APIGatewayProxyEvent;
-  const mockContext = {} as Context;
+  const event = {} as APIGatewayProxyEvent;
+  const context = {} as Context;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("should log start and completion messages", async () => {
-    const result = await handler(mockEvent, mockContext);
+    const result = await handler(event, context);
 
     expect(result).toBeUndefined();
-    expect(logger.addContext).toHaveBeenCalledWith(mockContext);
+    expect(logger.addContext).toHaveBeenCalledWith(context);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.JWKS_LAMBDA_STARTED);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.JWKS_LAMBDA_COMPLETED);
     expect(logger.info).toHaveBeenCalledTimes(2);

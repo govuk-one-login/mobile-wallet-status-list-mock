@@ -183,7 +183,7 @@ Resources:
   IssueFunction:
     Type: AWS::Serverless::Function
     DependsOn:
-      - IssueLogGroup
+      - IssueFunctionLogGroup
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -237,7 +237,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
-        - PolicyName: IssueFunctionLoggingPolicy
+        - PolicyName: LoggingPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -246,8 +246,28 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: arn:aws:logs:*:*:*
-        - PolicyName: VpcPolicy
+                Resource: !GetAtt IssueFunctionLogGroup.Arn
+        - PolicyName: S3BucketAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}/*
+                    - TargetBucket: !Ref StatusListBucket
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Sign
+                Resource: !GetAtt SigningKey.Arn
+        - PolicyName: VpcAccessPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -257,29 +277,12 @@ Resources:
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
                 Resource: '*'
-        - PolicyName: S3BucketAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:PutObject
-                Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-status-list/*
-        - PolicyName: KMSAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - kms:Sign
-                Resource: !GetAtt SigningKey.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-  IssueLogGroup:
+  IssueFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue
@@ -288,7 +291,7 @@ Resources:
   RevokeFunction:
     Type: AWS::Serverless::Function
     DependsOn:
-      - RevokeLogGroup
+      - RevokeFunctionLogGroup
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -339,7 +342,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
-        - PolicyName: RevokeFunctionLoggingPolicy
+        - PolicyName: LoggingPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -348,7 +351,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !GetAtt RevokeLogGroup.Arn
+                Resource: !GetAtt RevokeFunctionLogGroup.Arn
         - PolicyName: S3BucketAccess
           PolicyDocument:
             Version: "2012-10-17"
@@ -357,7 +360,10 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:PutObject
-                Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-status-list/*
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}/*
+                    - TargetBucket: !Ref StatusListBucket
         - PolicyName: KMSAccess
           PolicyDocument:
             Version: "2012-10-17"
@@ -366,12 +372,22 @@ Resources:
                 Action:
                   - kms:Sign
                 Resource: !GetAtt SigningKey.Arn
+        - PolicyName: VpcAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-  RevokeLogGroup:
+  RevokeFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
@@ -429,7 +445,17 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: UploadPolicy
+        - PolicyName: LoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt JwksFunctionLogGroup.Arn
+        - PolicyName: S3BucketAccess
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -440,25 +466,15 @@ Resources:
                   - !Sub
                     - arn:aws:s3:::${TargetBucket}/*
                     - TargetBucket: !Ref JwksBucket
-        - PolicyName: GetPublicKeyPolicy
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - kms:GetPublicKey
-                Resource:
-                  - !GetAtt SigningKey.Arn
-        - PolicyName: LoggingPolicy
+        - PolicyName: KMSAccess
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: arn:aws:logs:*:*:*
-        - PolicyName: VpcPolicy
+                  - kms:GetPublicKey
+                Resource: !GetAtt SigningKey.Arn
+        - PolicyName: VpcAccessPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
