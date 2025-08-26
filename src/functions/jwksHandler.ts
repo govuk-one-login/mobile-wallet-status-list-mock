@@ -47,7 +47,7 @@ function convertToJwk(spki: Uint8Array<ArrayBufferLike>, keyId: string): JWK {
   return {
     ...publicKey,
     use: "sig",
-    kid: crypto.createHash("sha256").update(keyId).digest().toString("hex"),
+    kid: keyId,
     alg: "ES256",
   } as JWK;
 }
