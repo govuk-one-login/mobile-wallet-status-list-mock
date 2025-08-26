@@ -26,7 +26,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: document-signing-certificate-issuer/.nvmrc
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
@@ -37,7 +39,7 @@ jobs:
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # v2
         with:
-          version: 1.131.0
+          version: 1.132.0
           use-installer: true
 
       - name: Validate SAM template
@@ -45,7 +47,7 @@ jobs:
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
           sam validate --lint
 
-      - name: Validate SAM build
+      - name: Build SAM template
         run: sam build --parallel
 
       - name: Upload SAM artifacts
