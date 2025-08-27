@@ -42,8 +42,11 @@ export async function handler(
   const configuration = getRandomConfig();
   const objectKey = randomUUID();
   const uri = `${config.SELF_URL}/t/${objectKey}`;
-  const keyId = config.SIGNING_KEY_ID!;
-  const token = await createToken(configuration.statusList, uri, keyId);
+  const token = await createToken(
+    configuration.statusList,
+    uri,
+    config.SIGNING_KEY_ID,
+  );
   await putObject(token, config.STATUS_LIST_BUCKET_NAME, objectKey);
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
