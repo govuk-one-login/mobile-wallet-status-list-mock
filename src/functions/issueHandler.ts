@@ -9,6 +9,13 @@ import { randomUUID } from "crypto";
 import { sign } from "../common/aws/kms";
 import { putObject } from "../common/aws/s3";
 import format from "ecdsa-sig-formatter";
+import { getConfig } from "../config/getConfig";
+
+const REQUIRED_ENV_VARS = [
+  "SIGNING_KEY_ID",
+  "SELF_URL",
+  "STATUS_LIST_BUCKET_NAME",
+] as const;
 
 interface Configuration {
   index: number;
@@ -30,12 +37,14 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
 
-  const config = getRandomConfig();
+  const config = getConfig(process.env, REQUIRED_ENV_VARS);
+
+  const configuration = getRandomConfig();
   const objectKey = randomUUID();
-  const uri = `${process.env.SELF_URL}/t/${objectKey}`;
-  const keyId = process.env.SIGNING_KEY_ID!;
-  const token = await createToken(config.statusList, uri, keyId);
-  await putObject(token, process.env.STATUS_LIST_BUCKET_NAME!, objectKey);
+  const uri = `${config.SELF_URL}/t/${objectKey}`;
+  const keyId = config.SIGNING_KEY_ID!;
+  const token = await createToken(configuration.statusList, uri, keyId);
+  await putObject(token, config.STATUS_LIST_BUCKET_NAME, objectKey);
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
@@ -43,7 +52,7 @@ export async function handler(
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      idx: config.index,
+      idx: configuration.index,
       uri: uri,
     }),
   };

@@ -2,6 +2,7 @@ export interface Config {
   SIGNING_KEY_ID: string;
   JWKS_BUCKET_NAME: string;
   STATUS_LIST_BUCKET_NAME: string;
+  SELF_URL: string;
 }
 
 export function getConfig<T extends keyof Config>(
