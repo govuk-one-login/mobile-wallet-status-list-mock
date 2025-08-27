@@ -8,9 +8,8 @@ import { mockClient } from "aws-sdk-client-mock";
 import { getPublicKey } from "../../../src/common/aws/kms";
 
 const mockKmsClient = mockClient(KMSClient);
-const kmsClient = mockClient(KMSClient);
 
-describe("getPublicKey", () => {
+describe("kms", () => {
   const mockSpki = new Uint8Array([1, 2, 3]);
 
   beforeEach(() => {
