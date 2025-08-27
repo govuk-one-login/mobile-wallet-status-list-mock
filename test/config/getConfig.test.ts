@@ -5,6 +5,7 @@ describe("getConfig", () => {
     SIGNING_KEY_ID: "test-key-id",
     JWKS_BUCKET_NAME: "test-jwks-bucket-name",
     STATUS_LIST_BUCKET_NAME: "test-status-bucket-name",
+    SELF_URL: "https://test-status-list.com",
   };
 
   it("should return config with single required field", () => {
@@ -37,6 +38,7 @@ describe("getConfig", () => {
         "SIGNING_KEY_ID",
         "JWKS_BUCKET_NAME",
         "STATUS_LIST_BUCKET_NAME",
+        "SELF_URL",
       ] as const,
     );
 
@@ -44,6 +46,7 @@ describe("getConfig", () => {
       SIGNING_KEY_ID: "test-key-id",
       JWKS_BUCKET_NAME: "test-jwks-bucket-name",
       STATUS_LIST_BUCKET_NAME: "test-status-bucket-name",
+      SELF_URL: "https://test-status-list.com",
     });
   });
 
@@ -98,6 +101,7 @@ describe("getConfig", () => {
           "SIGNING_KEY_ID",
           "JWKS_BUCKET_NAME",
           "STATUS_LIST_BUCKET_NAME",
+          "SELF_URL",
         ] as const,
       );
     }).toThrow(
