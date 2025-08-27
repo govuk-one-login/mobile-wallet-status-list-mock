@@ -56,9 +56,11 @@ describe("handler", () => {
     });
     expect(token).toBeDefined();
     expect(token).toContain(".");
-    expect(sign).toHaveBeenCalledWith(expect.any(String), "test-key-id");
-    expect(derToJose).toHaveBeenCalledWith(expect.any(String), "ES256");
-
+    expect(sign).toHaveBeenCalledWith(
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoidGVzdC1sc3QifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbSIsInR0bCI6MjU5MjAwMH0",
+      "test-key-id",
+    );
+    expect(derToJose).toHaveBeenCalledWith("AQID", "ES256");
     expect(upload).toHaveBeenCalledWith(
       "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemNBRUFBTVlBaFEifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyIsInR0bCI6MjU5MjAwMH0.mockJoseSignature",
       "test-bucket-name",
