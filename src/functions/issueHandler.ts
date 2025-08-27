@@ -7,7 +7,7 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { randomUUID } from "crypto";
 import { sign } from "../common/aws/kms";
-import { upload } from "../common/aws/s3";
+import { putObject } from "../common/aws/s3";
 import format from "ecdsa-sig-formatter";
 
 interface Configuration {
@@ -35,7 +35,7 @@ export async function handler(
   const uri = `${process.env.SELF_URL}/t/${objectKey}`;
   const keyId = process.env.SIGNING_KEY_ID!;
   const token = await createToken(config.statusList, uri, keyId);
-  await upload(token, process.env.STATUS_LIST_BUCKET_NAME!, objectKey);
+  await putObject(token, process.env.STATUS_LIST_BUCKET_NAME!, objectKey);
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 

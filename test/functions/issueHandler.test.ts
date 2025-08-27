@@ -4,7 +4,7 @@ import { logger } from "../../src/logging/logger";
 import { LogMessage } from "../../src/logging/LogMessage";
 import * as crypto from "crypto";
 import { sign } from "../../src/common/aws/kms";
-import { upload } from "../../src/common/aws/s3";
+import { putObject } from "../../src/common/aws/s3";
 import { derToJose } from "ecdsa-sig-formatter";
 
 jest.mock("../../src/common/aws/kms");
@@ -36,7 +36,7 @@ describe("handler", () => {
     jest.spyOn(global.Date, "now").mockReturnValue(Date.parse("2025-08-21"));
     jest.mocked(sign).mockResolvedValue(new Uint8Array([1, 2, 3]));
     jest.mocked(derToJose).mockReturnValue("mockJoseSignature");
-    jest.mocked(upload).mockResolvedValue();
+    jest.mocked(putObject).mockResolvedValue();
   });
 
   it("should return 200 response with expected body", async () => {
@@ -61,7 +61,7 @@ describe("handler", () => {
       "test-key-id",
     );
     expect(derToJose).toHaveBeenCalledWith("AQID", "ES256");
-    expect(upload).toHaveBeenCalledWith(
+    expect(putObject).toHaveBeenCalledWith(
       "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemNBRUFBTVlBaFEifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyIsInR0bCI6MjU5MjAwMH0.mockJoseSignature",
       "test-bucket-name",
       "36940190-e6af-42d0-9181-74c944dc4af7",
@@ -73,7 +73,7 @@ describe("handler", () => {
   });
 
   it("should propagate errors during S3 upload", async () => {
-    jest.mocked(upload).mockRejectedValue(new Error("S3 upload failed"));
+    jest.mocked(putObject).mockRejectedValue(new Error("S3 upload failed"));
     await expect(handler(mockEvent, mockContext)).rejects.toThrow(
       "S3 upload failed",
     );
