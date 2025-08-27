@@ -30,6 +30,7 @@ describe("handler", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Math, "random").mockReturnValue(0);
     jest
       .spyOn(crypto, "randomUUID")
       .mockReturnValue("36940190-e6af-42d0-9181-74c944dc4af7");
