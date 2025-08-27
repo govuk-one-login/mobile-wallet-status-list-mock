@@ -5,7 +5,7 @@ import { LogMessage } from "../../src/logging/LogMessage";
 import * as crypto from "crypto";
 import { sign } from "../../src/common/aws/kms";
 import { upload } from "../../src/common/aws/s3";
-import format from "ecdsa-sig-formatter";
+import { derToJose } from "ecdsa-sig-formatter";
 
 jest.mock("../../src/common/aws/kms");
 jest.mock("../../src/common/aws/s3");
@@ -21,75 +21,63 @@ jest.mock("ecdsa-sig-formatter");
 process.env.SIGNING_KEY_ID = "test-key-id";
 process.env.SELF_URL = "https://test-status-list.com";
 process.env.STATUS_LIST_BUCKET_NAME = "test-bucket-name";
-const bucket = "bucketName";
-const body = "token";
-const key = "key";
+
 const statusListMock = { bits: 2, lst: "test-lst" };
 
 describe("handler", () => {
   const mockEvent = {} as APIGatewayProxyEvent;
   const mockContext = {} as Context;
-  let uploadMock;
-  let signMock;
-  let derToJoseMock;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(Math, "random").mockReturnValue(0);
     jest
       .spyOn(crypto, "randomUUID")
       .mockReturnValue("36940190-e6af-42d0-9181-74c944dc4af7");
     jest.spyOn(global.Date, "now").mockReturnValue(Date.parse("2025-08-21"));
-    signMock = jest.mocked(sign).mockResolvedValue(new Uint8Array([1, 2, 3]));
-    derToJoseMock = jest
-      .mocked(format.derToJose)
-      .mockReturnValue("mockJoseSignature");
-    uploadMock = jest.mocked(upload).mockResolvedValue();
+    jest.mocked(sign).mockResolvedValue(new Uint8Array([1, 2, 3]));
+    jest.mocked(derToJose).mockReturnValue("mockJoseSignature");
+    jest.mocked(upload).mockResolvedValue();
   });
 
-  it("should create a token successfully", async () => {
+  it("should return 200 response with expected body", async () => {
     const token = await createToken(
       statusListMock,
       process.env.SELF_URL!,
       process.env.SIGNING_KEY_ID!,
     );
-    expect(token).toBeDefined();
-    expect(token).toContain(".");
-    expect(signMock).toHaveBeenCalledWith(expect.any(String), "test-key-id");
-    expect(derToJoseMock).toHaveBeenCalledWith(expect.any(String), "ES256");
-  });
-
-  it("should return 200 response with expected body", async () => {
     const result = await handler(mockEvent, mockContext);
     expect(result).toEqual({
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         idx: 0,
-        uri: process.env.SELF_URL + "/t/36940190-e6af-42d0-9181-74c944dc4af7",
+        uri: "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7",
       }),
     });
-    await expect(upload(body, bucket, key)).resolves.not.toThrow();
+    expect(token).toBeDefined();
+    expect(token).toContain(".");
+    expect(sign).toHaveBeenCalledWith(expect.any(String), "test-key-id");
+    expect(derToJose).toHaveBeenCalledWith(expect.any(String), "ES256");
+
     expect(upload).toHaveBeenCalledWith(
-      expect.any(String),
-      process.env.STATUS_LIST_BUCKET_NAME!,
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemNBRUFBTVlBaFEifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyIsInR0bCI6MjU5MjAwMH0.mockJoseSignature",
+      "test-bucket-name",
       "36940190-e6af-42d0-9181-74c944dc4af7",
     );
     expect(logger.addContext).toHaveBeenCalledWith(mockContext);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_STARTED);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_COMPLETED);
     expect(logger.info).toHaveBeenCalledTimes(2);
-    expect(uploadMock).toHaveBeenCalled();
   });
 
-  it("should handle errors during S3 upload", async () => {
-    uploadMock.mockRejectedValue(new Error("S3 upload failed"));
+  it("should propagate errors during S3 upload", async () => {
+    jest.mocked(upload).mockRejectedValue(new Error("S3 upload failed"));
     await expect(handler(mockEvent, mockContext)).rejects.toThrow(
       "S3 upload failed",
     );
   });
 
-  it("should handle errors during token creation", async () => {
+  it("should propagate errors during token creation", async () => {
     jest.mocked(sign).mockRejectedValue(new Error("Token creation failed"));
     await expect(handler(mockEvent, mockContext)).rejects.toThrow(
       "Token creation failed",

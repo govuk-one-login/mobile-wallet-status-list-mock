@@ -1,4 +1,4 @@
-import { KMSClient, SignCommand, SignCommandInput } from "@aws-sdk/client-kms"; // ES Modules import
+import { KMSClient, SignCommand, SignCommandInput } from "@aws-sdk/client-kms";
 
 const client = new KMSClient();
 

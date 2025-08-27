@@ -21,6 +21,7 @@ interface StatusList {
 }
 
 const TTL = 2592000;
+const ALGORITHM = "ES256";
 
 export async function handler(
   _event: APIGatewayProxyEvent,
@@ -81,16 +82,15 @@ export async function createToken(
 
   const message = `${encodedHeader}.${encodedPayload}`;
 
-  const signature = await sign(message, keyId);
-  const signature64Encoded = base64Encoder(signature);
-  const signatureJose = format.derToJose(signature64Encoded, "ES256");
+  const encodedSignature = base64Encoder(await sign(message, keyId));
+  const signature = format.derToJose(encodedSignature, ALGORITHM);
 
-  return `${message}.${signatureJose}`;
+  return `${message}.${signature}`;
 }
 
 function buildHeader(keyId: string) {
   return {
-    alg: "ES256",
+    alg: ALGORITHM,
     kid: keyId,
     typ: "statuslist+jwt",
   };

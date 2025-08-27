@@ -12,7 +12,7 @@ beforeEach(() => {
 });
 
 describe("upload", () => {
-  it("should upload the token in s3 bucket", async () => {
+  it("should successfully upload to S3", async () => {
     const s3Client = mockClient(S3Client);
     s3Client.on(PutObjectCommand).resolves({});
     await expect(upload(body, bucket, key)).resolves.not.toThrow();
@@ -23,7 +23,7 @@ describe("upload", () => {
     });
   });
 
-  it("should throw error when s3 client throws an error", async () => {
+  it("should propagate S3 errors", async () => {
     const s3Client = mockClient(S3Client);
     s3Client.on(PutObjectCommand).rejectsOnce(new Error("S3 upload failed"));
     await expect(upload(body, bucket, key)).rejects.toThrow("S3 upload failed");

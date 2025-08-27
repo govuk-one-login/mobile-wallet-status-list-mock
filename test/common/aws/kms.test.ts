@@ -20,7 +20,7 @@ describe("sign", () => {
     await expect(result).rejects.toThrow("No Signature returned");
   });
 
-  it("should handle KMS client errors", async () => {
+  it("should propagate KMS client errors", async () => {
     const kmsError = new Error("KMS Service Unavailable");
     kmsClient.on(SignCommand).rejects(kmsError);
     const result = sign("message", "keyId");
