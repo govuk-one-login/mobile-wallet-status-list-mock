@@ -1,17 +1,17 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
-const client = new S3Client();
+const s3Client = new S3Client();
 
-export async function upload(
-  body: string,
+export async function putObject(
   bucket: string,
   key: string,
+  body: string,
 ): Promise<void> {
-  const input = {
-    Body: body,
+  const putObjectCommand: PutObjectCommand = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
-  };
-  const command = new PutObjectCommand(input);
-  await client.send(command);
+    Body: body,
+    ContentType: "application/json",
+  });
+  await s3Client.send(putObjectCommand);
 }
