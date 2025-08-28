@@ -5,6 +5,14 @@ import {
 } from "aws-lambda";
 import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
+import { getConfig } from "../config/getConfig";
+import { putObject } from "../common/aws/s3";
+import { createToken, StatusList } from "../../test/common/token/createToken";
+
+const REQUIRED_ENV_VARS = [
+  "STATUS_LIST_BUCKET_NAME",
+  "SIGNING_KEY_ID",
+] as const;
 
 export async function handler(
   event: APIGatewayProxyEvent,
@@ -12,6 +20,20 @@ export async function handler(
 ): Promise<APIGatewayProxyResult> {
   logger.addContext(context);
   logger.info(LogMessage.REVOKE_LAMBDA_STARTED);
+
+  const config = getConfig(process.env, REQUIRED_ENV_VARS);
+
+  const requestJWT = event.body;
+  const uri = getRequestBody(requestJWT).uri;
+  const index = getRequestBody(requestJWT).idx;
+  const objectKey = uri.substring(uri.lastIndexOf("/t/" + 3));
+  const updatedToken = await createToken(
+    getRevokedConfiguration(index),
+    uri,
+    config.SIGNING_KEY_ID,
+  );
+  await putObject(config.STATUS_LIST_BUCKET_NAME, objectKey, updatedToken);
+
   logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
   return {
     statusCode: 202,
@@ -21,4 +43,26 @@ export async function handler(
       revokedAt: Date.now(),
     }),
   };
+}
+
+export function getRequestBody(jwt: string | null) {
+  if (jwt === null) {
+    throw new Error("Request body is empty");
+  }
+
+  const payload = Buffer.from(jwt.split(".")[1], "base64url").toString();
+  const data = JSON.parse(payload);
+
+  if (!data.uri || !data.idx) {
+    throw new Error("JWT payload is missing 'uri' or 'idx' claim");
+  }
+  return data;
+}
+
+function getRevokedConfiguration(idx: number): StatusList {
+  if (idx === 0) {
+    return { bits: 2, lst: "eNpzdAEAAMgAhg" };
+  } else {
+    return { bits: 2, lst: "eNqTSwcAAKUAhg" };
+  }
 }
