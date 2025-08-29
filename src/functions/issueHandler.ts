@@ -38,7 +38,7 @@ export async function handler(
     uri,
     config.SIGNING_KEY_ID,
   );
-  await putObject(token, config.STATUS_LIST_BUCKET_NAME, objectKey);
+  await putObject(config.STATUS_LIST_BUCKET_NAME, objectKey, token);
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
