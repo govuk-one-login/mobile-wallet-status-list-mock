@@ -26,7 +26,7 @@ export async function handler(
   const requestJWT = event.body;
   const uri = getRequestBody(requestJWT).uri;
   const index = getRequestBody(requestJWT).idx;
-  const objectKey = uri.substring(uri.lastIndexOf("/" + 3) + 1);
+  const objectKey = uri.substring(uri.lastIndexOf("/") + 1);
 
   const updatedToken = await createToken(
     getRevokedConfiguration(index),
