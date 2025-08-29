@@ -24,13 +24,11 @@ export async function handler(
 
   const config = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const requestJWT = event.body;
-  const uri = getRequestBody(requestJWT).uri;
-  const index = getRequestBody(requestJWT).idx;
+  const { body } = event;
+  const { uri, idx } = extractUriAndIndex(body);
   const objectKey = uri.substring(uri.lastIndexOf("/") + 1);
-
   const updatedToken = await createToken(
-    getRevokedConfiguration(index),
+    getRevokedConfiguration(idx),
     uri,
     config.SIGNING_KEY_ID,
   );
@@ -46,19 +44,24 @@ export async function handler(
     }),
   };
 }
-
-export function getRequestBody(jwt: string | null) {
-  if (!jwt) {
+export function extractUriAndIndex(body: string | null): {
+  uri: string;
+  idx: number;
+} {
+  if (!body) {
     throw new Error("Request body is empty");
   }
-
-  const payload = Buffer.from(jwt.split(".")[1], "base64url").toString();
-  const data = JSON.parse(payload);
-
-  if (!data.uri || !data.idx) {
+  const tokenParts = body.split(".");
+  const payload = JSON.parse(base64DecodeToString(tokenParts[1]));
+  const { uri, idx } = payload;
+  if (!uri || idx === undefined) {
     throw new Error("JWT payload is missing 'uri' or 'idx' claim");
   }
-  return data;
+  return { uri, idx };
+}
+
+function base64DecodeToString(value: string): string {
+  return Buffer.from(value, "base64url").toString();
 }
 
 export function getRevokedConfiguration(idx: number): StatusList {
