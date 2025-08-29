@@ -7,7 +7,8 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { getConfig } from "../config/getConfig";
 import { putObject } from "../common/aws/s3";
-import { createToken, StatusList } from "../common/token/createToken";
+import { createToken } from "../common/token/createToken";
+import { StatusList } from "../common/types/statusList";
 
 const REQUIRED_ENV_VARS = [
   "STATUS_LIST_BUCKET_NAME",

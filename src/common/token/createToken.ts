@@ -1,10 +1,6 @@
 import { sign } from "../aws/kms";
 import format from "ecdsa-sig-formatter";
-
-export interface StatusList {
-  bits: number;
-  lst: string;
-}
+import { StatusList } from "../types/statusList";
 
 const TTL = 2592000;
 const ALGORITHM = "ES256";

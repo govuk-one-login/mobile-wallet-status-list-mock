@@ -3,10 +3,10 @@ import {
   buildHeader,
   buildPayload,
   createToken,
-  StatusList,
 } from "../../../src/common/token/createToken";
 import { derToJose } from "ecdsa-sig-formatter";
 import { sign } from "../../../src/common/aws/kms";
+import { StatusList } from "../../../src/common/types/statusList";
 
 jest.mock("../../../src/common/aws/kms");
 jest.mock("ecdsa-sig-formatter");
