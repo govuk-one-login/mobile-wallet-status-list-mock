@@ -1,5 +1,9 @@
 import { APIGatewayProxyEvent, Context } from "aws-lambda";
-import { getRequestBody, handler } from "../../src/functions/revokeHandler";
+import {
+  getRequestBody,
+  getRevokedConfiguration,
+  handler,
+} from "../../src/functions/revokeHandler";
 import { logger } from "../../src/logging/logger";
 import { LogMessage } from "../../src/logging/LogMessage";
 import { putObject } from "../../src/common/aws/s3";
@@ -96,5 +100,17 @@ describe("getRequestBody", () => {
     const validJwt =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmkiOiJodHRwOi8vZXhhbXBsZS5jb20iLCJpZHgiOjF9.sM_g-e2a0h5z7g7g-e2a0h5z7g7g";
     expect(getRequestBody(validJwt).idx).toBe(1);
+  });
+});
+
+describe("getRevokedConfiguration", () => {
+  it("should return the correct configuration for idx 0", () => {
+    const config = getRevokedConfiguration(0);
+    expect(config).toEqual({ bits: 2, lst: "eNpzdAEAAMgAhg" });
+  });
+
+  it("should return the correct configuration for idx 5", () => {
+    const config = getRevokedConfiguration(5);
+    expect(config).toEqual({ bits: 2, lst: "eNqTSwcAAKUAhg" });
   });
 });

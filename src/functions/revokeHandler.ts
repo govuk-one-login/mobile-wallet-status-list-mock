@@ -60,7 +60,7 @@ export function getRequestBody(jwt: string | null) {
   return data;
 }
 
-function getRevokedConfiguration(idx: number): StatusList {
+export function getRevokedConfiguration(idx: number): StatusList {
   if (idx === 0) {
     return { bits: 2, lst: "eNpzdAEAAMgAhg" };
   } else {
