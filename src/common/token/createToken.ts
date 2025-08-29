@@ -1,4 +1,4 @@
-import { sign } from "../../../src/common/aws/kms";
+import { sign } from "../aws/kms";
 import format from "ecdsa-sig-formatter";
 
 export interface StatusList {
@@ -28,7 +28,7 @@ export async function createToken(
   return `${message}.${signature}`;
 }
 
-function buildHeader(keyId: string) {
+export function buildHeader(keyId: string) {
   return {
     alg: ALGORITHM,
     kid: keyId,
@@ -36,7 +36,7 @@ function buildHeader(keyId: string) {
   };
 }
 
-function buildPayload(statusList: StatusList, uri: string) {
+export function buildPayload(statusList: StatusList, uri: string) {
   const timestamp = Math.floor(Date.now() / 1000);
   return {
     iat: timestamp,
@@ -47,6 +47,6 @@ function buildPayload(statusList: StatusList, uri: string) {
   };
 }
 
-function base64Encoder(data: string | Uint8Array<ArrayBufferLike>) {
+export function base64Encoder(data: string | Uint8Array<ArrayBufferLike>) {
   return Buffer.from(data).toString("base64url");
 }

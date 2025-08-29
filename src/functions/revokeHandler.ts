@@ -7,7 +7,7 @@ import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
 import { getConfig } from "../config/getConfig";
 import { putObject } from "../common/aws/s3";
-import { createToken, StatusList } from "../../test/common/token/createToken";
+import { createToken, StatusList } from "../common/token/createToken";
 
 const REQUIRED_ENV_VARS = [
   "STATUS_LIST_BUCKET_NAME",
@@ -26,7 +26,8 @@ export async function handler(
   const requestJWT = event.body;
   const uri = getRequestBody(requestJWT).uri;
   const index = getRequestBody(requestJWT).idx;
-  const objectKey = uri.substring(uri.lastIndexOf("/t/" + 3));
+  const objectKey = uri.substring(uri.lastIndexOf("/" + 3) + 1);
+
   const updatedToken = await createToken(
     getRevokedConfiguration(index),
     uri,
@@ -46,7 +47,7 @@ export async function handler(
 }
 
 export function getRequestBody(jwt: string | null) {
-  if (jwt === null) {
+  if (!jwt) {
     throw new Error("Request body is empty");
   }
 

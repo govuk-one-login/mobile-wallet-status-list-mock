@@ -8,7 +8,7 @@ import { LogMessage } from "../logging/LogMessage";
 import { randomUUID } from "crypto";
 import { putObject } from "../common/aws/s3";
 import { getConfig } from "../config/getConfig";
-import { createToken, StatusList } from "../../test/common/token/createToken";
+import { createToken, StatusList } from "../common/token/createToken";
 
 const REQUIRED_ENV_VARS = [
   "SIGNING_KEY_ID",
