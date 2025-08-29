@@ -64,5 +64,5 @@ function getRandomConfig(): Configuration {
     },
   ];
 
-  return configurations[Math.floor(Math.random() * configurations.length)]; // NOSONAR: Using Math.random() is safe here as security-critical randomness is not required
+  return configurations[Math.floor(Math.random() * configurations.length)]; // NOSONAR: Using Math.random() is safe here as security-critical randomness is not require
 }
