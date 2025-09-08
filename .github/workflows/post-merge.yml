@@ -25,7 +25,7 @@ jobs:
           ref: ${{ inputs.gitRef }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -38,13 +38,13 @@ jobs:
         run: npm run test
 
       - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@8c71dc039c2dd71d3821e89a2b58ecc7fee6ced9 # v5.3.0
+        uses: sonarsource/sonarqube-scan-action@1a6d90ebcb0e6a6b1d87e37ba693fe453195ae25 # v5.3.1
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
         with:
           role-to-assume: ${{ secrets.BUILD_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
@@ -65,7 +65,7 @@ jobs:
 
       - name: Upload SAM artifacts
         # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
-        uses: govuk-one-login/devplatform-upload-action@720ddb75fba8951db5a648ebb416eb233f1b6bc9 # v3.10.1
+        uses: govuk-one-login/devplatform-upload-action@fda75612a1b0e5a8c84ae7c44a23340e50e5bbde # v3.11.0
         with:
           artifact-bucket-name: ${{ secrets.BUILD_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.BUILD_SIGNING_PROFILE_NAME }}
