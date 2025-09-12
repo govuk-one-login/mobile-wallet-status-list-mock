@@ -32,8 +32,8 @@ export async function handler(
   const config = getConfig(process.env, REQUIRED_ENV_VARS);
 
   const configuration = getRandomConfig();
-  const objectKey = randomUUID();
-  const uri = `${config.SELF_URL}/t/${objectKey}`;
+  const objectKey = "t/" + randomUUID();
+  const uri = `${config.SELF_URL}/${objectKey}`;
   const token = await createToken(
     configuration.statusList,
     uri,

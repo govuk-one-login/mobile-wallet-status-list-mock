@@ -57,7 +57,7 @@ describe("handler", () => {
 
     expect(putObject).toHaveBeenCalledWith(
       "test-bucket-name",
-      "36940190-e6af-42d0-9181-74c944dc4af7",
+      "t/36940190-e6af-42d0-9181-74c944dc4af7",
       "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MTIzNzE1OTg5MCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5xVFN3Y0FBS1VBaGcifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyIsInR0bCI6MjU5MjAwMH0.mockJoseSignature",
     );
     expect(logger.addContext).toHaveBeenCalledWith(mockContext);
