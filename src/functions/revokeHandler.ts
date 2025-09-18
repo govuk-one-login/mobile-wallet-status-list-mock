@@ -26,7 +26,8 @@ export async function handler(
 
   const { body } = event;
   const { uri, idx } = extractUriAndIndex(body);
-  const objectKey = uri.substring(uri.lastIndexOf("/") + 1);
+  const url = new URL(uri);
+  const objectKey = url.pathname.slice(1);
   const updatedToken = await createToken(
     getRevokedConfiguration(idx),
     uri,
