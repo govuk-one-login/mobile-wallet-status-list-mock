@@ -5,7 +5,7 @@ import {
 } from "aws-lambda";
 import { logger } from "../logging/logger";
 import { LogMessage } from "../logging/LogMessage";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { putObject } from "../common/aws/s3";
 import { getConfig } from "../config/getConfig";
 import { createToken } from "../common/token/createToken";
@@ -65,5 +65,5 @@ function getRandomConfig(): Configuration {
     },
   ];
 
-  return configurations[Math.floor(Math.random() * configurations.length)]; // NOSONAR: Using Math.random() is safe here as security-critical randomness is not require
+  return configurations[Math.floor(Math.random() * configurations.length)];
 }
