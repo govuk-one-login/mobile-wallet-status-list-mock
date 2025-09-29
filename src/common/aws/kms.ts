@@ -37,7 +37,7 @@ export async function sign(
   const response = await kmsClient.send(command);
 
   if (!response.Signature) {
-    throw Error("No Signature returned");
+    throw new Error("No Signature returned");
   }
 
   return response.Signature;
