@@ -15,16 +15,21 @@ jest.mock("../../src/logging/logger", () => ({
     info: jest.fn(),
   },
 }));
-jest.mock("crypto", () => ({
-  createPublicKey: jest.fn(() => ({
-    export: jest.fn(() => ({
-      kty: "EC",
-      crv: "P-256",
-      x: "xxx",
-      y: "yyy",
+jest.mock("crypto", () => {
+  const actualCrypto = jest.requireActual("crypto");
+  return {
+    ...actualCrypto,
+    default: actualCrypto,
+    createPublicKey: jest.fn(() => ({
+      export: jest.fn(() => ({
+        kty: "EC",
+        crv: "P-256",
+        x: "xxx",
+        y: "yyy",
+      })),
     })),
-  })),
-}));
+  };
+});
 
 describe("handler", () => {
   const event = {} as APIGatewayProxyEvent;
