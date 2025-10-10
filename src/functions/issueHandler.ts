@@ -17,7 +17,7 @@ const REQUIRED_ENV_VARS = [
   "STATUS_LIST_BUCKET_NAME",
 ] as const;
 
-interface Configuration {
+interface StatusListConfig {
   index: number;
   statusList: StatusList;
 }
@@ -29,17 +29,19 @@ export async function handler(
   logger.addContext(context);
   logger.info(LogMessage.ISSUE_LAMBDA_STARTED);
 
-  const config = getConfig(process.env, REQUIRED_ENV_VARS);
+  const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const configuration = getRandomConfig();
+  const statusListConfig = getRandomStatusListConfig();
   const objectKey = "t/" + randomUUID();
-  const uri = `${config.SELF_URL}/${objectKey}`;
-  const token = await createToken(
-    configuration.statusList,
+  const uri = `${appConfig.SELF_URL}/${objectKey}`;
+
+  const token = await createToken({
+    selfUrl: appConfig.SELF_URL,
+    statusList: statusListConfig.statusList,
     uri,
-    config.SIGNING_KEY_ID,
-  );
-  await putObject(config.STATUS_LIST_BUCKET_NAME, objectKey, token);
+    keyId: appConfig.SIGNING_KEY_ID,
+  });
+  await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, token);
 
   logger.info(LogMessage.ISSUE_LAMBDA_COMPLETED);
 
@@ -47,13 +49,13 @@ export async function handler(
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      idx: configuration.index,
-      uri: uri,
+      idx: statusListConfig.index,
+      uri,
     }),
   };
 }
 
-function getRandomConfig(): Configuration {
+function getRandomStatusListConfig(): StatusListConfig {
   const configurations = [
     { index: 0, statusList: { bits: 2, lst: "eNpzcAEAAMYAhQ" } },
     {
