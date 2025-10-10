@@ -1,81 +1,86 @@
-import {
-  base64Encoder,
-  buildHeader,
-  buildPayload,
-  createToken,
-} from "../../../src/common/token/createToken";
+import { createToken } from "../../../src/common/token/createToken";
 import { derToJose } from "ecdsa-sig-formatter";
 import { sign } from "../../../src/common/aws/kms";
-import { StatusList } from "../../../src/common/types/statusList";
 
 jest.mock("../../../src/common/aws/kms");
 jest.mock("ecdsa-sig-formatter");
-jest.mocked(sign).mockResolvedValue(new Uint8Array([1, 2, 3]));
-jest.mocked(derToJose).mockReturnValue("mockJoseSignature");
-
-const TTL = 2592000;
-const ALGORITHM = "ES256";
-const mockKeyId = "test-key-id";
-const mockUri =
-  "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7";
-const mockStatusList: StatusList = { bits: 32, lst: "testList" };
 
 describe("createToken", () => {
-  it("should create a valid token", async () => {
-    const token = await createToken(mockStatusList, mockUri, mockKeyId);
-    expect(token).toBeDefined();
-    expect(token).toContain(".");
-    expect(token.split(".").length).toBe(3);
+  let dateSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    const mockTimestamp = 1739491200 * 1000;
+    dateSpy = jest.spyOn(global.Date, "now").mockReturnValue(mockTimestamp);
   });
 
-  it("should encode header and payload correctly", async () => {
-    const header = buildHeader(mockKeyId);
-    const payload = buildPayload(mockStatusList, mockUri);
-    const encodedHeader = base64Encoder(JSON.stringify(header));
-    const encodedPayload = base64Encoder(JSON.stringify(payload));
-    const token = await createToken(mockStatusList, mockUri, mockKeyId);
-    const [tokenHeader, tokenPayload] = token.split(".").slice(0, 2);
-    expect(tokenHeader).toBe(encodedHeader);
-    expect(tokenPayload).toBe(encodedPayload);
+  afterAll(() => {
+    dateSpy.mockRestore();
   });
 
-  it("should include correct timestamp and TTL in payload", async () => {
-    const token = await createToken(mockStatusList, mockUri, mockKeyId);
-    const payload = JSON.parse(
-      Buffer.from(token.split(".")[1], "base64url").toString(),
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(sign).mockResolvedValue(new Uint8Array([1, 2, 3]));
+    jest.mocked(derToJose).mockReturnValue("mockJoseSignature");
+  });
+
+  const testParams = {
+    selfUrl: "https://test-status-list.com/",
+    statusList: { bits: 2, lst: "eNpzcAEAAMYAhQ" },
+    uri: "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7",
+    keyId: "test-key-id",
+  };
+
+  it("should create a valid JWT with correct header and payload", async () => {
+    const token = await createToken(testParams);
+
+    expect(token).toMatch(/^[^.]+\.[^.]+\.[^.]+$/);
+
+    const [header, payload, signature] = token.split(".");
+
+    const decodedHeader = JSON.parse(
+      Buffer.from(header, "base64url").toString(),
     );
-    const timestamp = Math.floor(Date.now() / 1000);
-    expect(payload.iat).toBeGreaterThanOrEqual(timestamp - 10);
-    expect(payload.exp).toBe(timestamp + TTL);
-    expect(payload.ttl).toBe(TTL);
-  });
-});
-
-describe("Helper Functions", () => {
-  it("should build a correct header", () => {
-    const header = buildHeader(mockKeyId);
-    expect(header).toEqual({
-      alg: ALGORITHM,
-      kid: mockKeyId,
+    expect(decodedHeader).toEqual({
+      alg: "ES256",
+      kid: testParams.keyId,
       typ: "statuslist+jwt",
     });
-  });
 
-  it("should build a correct payload", () => {
-    const payload = buildPayload(mockStatusList, mockUri);
-    const timestamp = Math.floor(Date.now() / 1000);
-    expect(payload).toEqual({
-      iat: timestamp,
-      exp: timestamp + TTL,
-      status_list: mockStatusList,
-      sub: mockUri,
-      ttl: TTL,
+    const decodedPayload = JSON.parse(
+      Buffer.from(payload, "base64url").toString(),
+    );
+    expect(decodedPayload).toEqual({
+      iat: 1739491200,
+      exp: 1739491200 + 2592000,
+      iss: testParams.selfUrl,
+      status_list: testParams.statusList,
+      sub: testParams.uri,
+      ttl: 2592000,
     });
+
+    expect(signature).toEqual("mockJoseSignature");
   });
 
-  it("should correctly encode data using base64url", () => {
-    const data = "test data";
-    const encodedData = base64Encoder(data);
-    expect(Buffer.from(encodedData, "base64url").toString()).toBe(data);
+  it("should sign the correct message with the correct key", async () => {
+    await createToken(testParams);
+
+    const expectedMessage =
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3Mzk0OTEyMDAsImV4cCI6MTc0MjA4MzIwMCwiaXNzIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS8iLCJzdGF0dXNfbGlzdCI6eyJiaXRzIjoyLCJsc3QiOiJlTnB6Y0FFQUFNWUFoUSJ9LCJzdWIiOiJodHRwczovL3Rlc3Qtc3RhdHVzLWxpc3QuY29tL3QvMzY5NDAxOTAtZTZhZi00MmQwLTkxODEtNzRjOTQ0ZGM0YWY3IiwidHRsIjoyNTkyMDAwfQ";
+    expect(sign).toHaveBeenCalledWith(expectedMessage, testParams.keyId);
+  });
+
+  it("should convert the signature from DER to JOSE format", async () => {
+    await createToken(testParams);
+
+    // The mocked sign function returns Uint8Array([1, 2, 3]), which base64url-encodes to 'AQID'
+    const expectedDerSignature = "AQID";
+    expect(derToJose).toHaveBeenCalledWith(expectedDerSignature, "ES256");
+    expect(derToJose).toHaveLastReturnedWith("mockJoseSignature");
+  });
+
+  it("should propagate signing errors", async () => {
+    jest.mocked(sign).mockRejectedValueOnce(new Error("KMS error"));
+
+    await expect(createToken(testParams)).rejects.toThrow("KMS error");
   });
 });
