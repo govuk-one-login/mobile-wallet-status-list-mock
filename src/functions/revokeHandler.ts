@@ -9,6 +9,7 @@ import { getConfig } from "../config/getConfig";
 import { putObject } from "../common/aws/s3";
 import { createToken } from "../common/token/createToken";
 import { StatusList } from "../common/types/statusList";
+import {getStatusListByIndex} from "../common/statusList/statusList";
 
 const REQUIRED_ENV_VARS = [
   "STATUS_LIST_BUCKET_NAME",
@@ -31,7 +32,7 @@ export async function handler(
 
   const updatedToken = await createToken({
     selfUrl: appConfig.SELF_URL,
-    statusList: getRevokedConfiguration(idx),
+    statusList: getStatusListByIndex(idx, "revoked"),
     uri,
     keyId: appConfig.SIGNING_KEY_ID,
   });

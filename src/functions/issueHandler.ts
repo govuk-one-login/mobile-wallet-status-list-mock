@@ -9,18 +9,13 @@ import { randomUUID } from "node:crypto";
 import { putObject } from "../common/aws/s3";
 import { getConfig } from "../config/getConfig";
 import { createToken } from "../common/token/createToken";
-import { StatusList } from "../common/types/statusList";
+import { getStatusListByIndex, STATUS_LIST_CONFIG} from "../common/statusList/statusList";
 
 const REQUIRED_ENV_VARS = [
   "SIGNING_KEY_ID",
   "SELF_URL",
   "STATUS_LIST_BUCKET_NAME",
 ] as const;
-
-interface StatusListConfig {
-  index: number;
-  statusList: StatusList;
-}
 
 export async function handler(
   _event: APIGatewayProxyEvent,
@@ -31,13 +26,15 @@ export async function handler(
 
   const appConfig = getConfig(process.env, REQUIRED_ENV_VARS);
 
-  const statusListConfig = getRandomStatusListConfig();
+  const randomIndex = Math.floor(Math.random() * STATUS_LIST_CONFIG.length);
+  const idx = STATUS_LIST_CONFIG[randomIndex].index;
+  const statusList = getStatusListByIndex(idx, "valid");
   const objectKey = "t/" + randomUUID();
   const uri = `${appConfig.SELF_URL}/${objectKey}`;
 
   const token = await createToken({
     selfUrl: appConfig.SELF_URL,
-    statusList: statusListConfig.statusList,
+    statusList,
     uri,
     keyId: appConfig.SIGNING_KEY_ID,
   });
@@ -49,23 +46,8 @@ export async function handler(
     statusCode: 200,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      idx: statusListConfig.index,
+      idx,
       uri,
     }),
   };
-}
-
-function getRandomStatusListConfig(): StatusListConfig {
-  const configurations = [
-    { index: 0, statusList: { bits: 2, lst: "eNpzcAEAAMYAhQ" } },
-    {
-      index: 5,
-      statusList: {
-        bits: 2,
-        lst: "eNqTSwYAAKEAgg",
-      },
-    },
-  ];
-
-  return configurations[Math.floor(Math.random() * configurations.length)];
 }
