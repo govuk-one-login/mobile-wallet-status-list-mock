@@ -29,15 +29,20 @@ export async function handler(
   const url = new URL(uri);
   const objectKey = url.pathname.slice(1);
 
-  const updatedToken = await createToken({
+  const statusListToken = await createToken({
     selfUrl: appConfig.SELF_URL,
     statusList: getRevokedConfiguration(idx),
     uri,
     keyId: appConfig.SIGNING_KEY_ID,
   });
-  await putObject(appConfig.STATUS_LIST_BUCKET_NAME, objectKey, updatedToken);
+  await putObject(
+    appConfig.STATUS_LIST_BUCKET_NAME,
+    objectKey,
+    statusListToken,
+  );
 
   logger.info(LogMessage.REVOKE_LAMBDA_COMPLETED);
+
   return {
     statusCode: 202,
     headers: { "Content-Type": "application/json" },
@@ -53,19 +58,31 @@ function extractUriAndIndex(body: string | null): {
   idx: number;
 } {
   if (!body) {
-    throw new Error("Request body is empty");
+    throw new Error("Event body is missing");
   }
-  const tokenParts = body.split(".");
-  const payload = JSON.parse(base64DecodeToString(tokenParts[1]));
-  const { uri, idx } = payload;
-  if (!uri || idx === undefined) {
-    throw new Error("JWT payload is missing 'uri' or 'idx' claim");
-  }
-  return { uri, idx };
-}
 
-function base64DecodeToString(value: string): string {
-  return Buffer.from(value, "base64url").toString();
+  let uri, idx;
+  try {
+    const tokenParts = body.split(".");
+    const payloadStr = Buffer.from(tokenParts[1], "base64url").toString();
+    const payload = JSON.parse(payloadStr);
+    uri = payload.uri;
+    idx = payload.idx;
+  } catch (error) {
+    throw new Error(
+      `Failed to extract uri and idx from JWT: ${error}`,
+    );
+  }
+
+  if (typeof uri !== "string" || !uri.trim()) {
+    throw new Error("JWT payload 'uri' claim must be a non-empty string");
+  }
+
+  if (typeof idx !== "number") {
+    throw new Error("JWT payload 'idx' claim must be a number");
+  }
+
+  return { uri, idx };
 }
 
 function getRevokedConfiguration(idx: number): StatusList {

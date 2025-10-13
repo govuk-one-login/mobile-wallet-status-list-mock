@@ -35,7 +35,7 @@ describe("handler", () => {
     jest.mocked(putObject).mockResolvedValue();
   });
 
-  it("should return 200 response with expected body", async () => {
+  it("should process a valid issue request successfully", async () => {
     const result = await handler(mockEvent, mockContext);
 
     expect(result).toEqual({
