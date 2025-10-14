@@ -315,6 +315,9 @@ Resources:
           POWERTOOLS_SERVICE_NAME: Revoke
           STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
           SIGNING_KEY_ID: !Ref SigningKey
+          SELF_URL: !Sub
+            - "https://${SelfUrl}"
+            - SelfUrl: !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
