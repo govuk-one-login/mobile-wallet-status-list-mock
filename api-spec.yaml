@@ -93,6 +93,9 @@ paths:
                     type: number
                     example: 1760447340
                     description: Unix timestamp (in seconds) when the credential was revoked
+                required:
+                  - message
+                  - revokedAt
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
@@ -144,6 +147,7 @@ paths:
                     - status_list.lst: (string) Status values for all the tokens this list conveys statuses for
                     - sub: (string) The URI of the status list that holds the issued credential
                     - ttl: (string) JWT time to live
+                required: true
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
@@ -203,6 +207,15 @@ paths:
                           type: string
                         y:
                           type: string
+                      required:
+                        - kid
+                        - kty
+                        - alg
+                        - use
+                        - x
+                        - y
+                required:
+                  - keys
               example:
                 {
                   "keys":
