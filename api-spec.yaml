@@ -91,8 +91,8 @@ paths:
                     description: Status message indicating the result
                   revokedAt:
                     type: number
-                    example: 1734709493
-                    description: Unix timestamp when the credential was revoked
+                    example: 1760447340
+                    description: Unix timestamp (in seconds) when the credential was revoked
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:

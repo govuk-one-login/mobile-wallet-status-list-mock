@@ -42,7 +42,7 @@ export async function handler(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       message: "Request processed for revocation",
-      revokedAt: Date.now(),
+      revokedAt: Math.floor(Date.now() / 1000),
     }),
   };
 }
