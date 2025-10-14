@@ -7,14 +7,25 @@ paths:
     post:
       tags:
         - issue
-      description: Issue a new index
+      description: Endpoint to issue credentials
       requestBody:
         content:
           application/json:
             schema:
               type: string
               example: "eyJ..."
-        required: true
+              description: |
+                JWT containing issuer information and status expiry
+                Required header claims:
+                  - alg: (string) Algorithm used for signing the JWT ("ES256")
+                  - typ: (string) Type of the token ("JWT")
+                  - kid: (string) Key ID used to identify the signing key in the credential issuer JWKS endpoint
+                Required payload claims: 
+                  - iss: (string) Must match a known clientId
+                  - iat: (number) (unix timestamp) JWT issued at time
+                  - statusExpiry: (number) (unix timestamp) Date the issued credential expires
+                  - jti: (string) JWT ID
+              required: true
       responses:
         "200":
           description: OK
@@ -24,11 +35,14 @@ paths:
                 type: object
                 properties:
                   idx:
-                    type: integer
+                    type: number
                     example: 0
                   uri:
                     type: string
                     example: "https://status-list-mock.mobile.{environment}.account.gov.uk/t/db6ac25a-bbd3-4b4a-b2d1-c75cb92d0ca6"
+                required:
+                  - idx
+                  - uri
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
@@ -42,17 +56,43 @@ paths:
         type: "aws_proxy"
   /revoke:
     post:
-      description: Revoke an index
+      description: Endpoint to revoke credentials
       requestBody:
         content:
           application/json:
             schema:
               type: string
               example: "eyJ..."
+              description: |
+                JWT containing the index and URI to revoke
+                Required header claims:
+                  - alg: (string) Algorithm used for signing the JWT ("ES256")
+                  - typ: (string) Type of the token ("JWT")
+                  - kid: (string) Key ID used to identify the signing key in the credential issuer JWKS endpoint
+                Required payload claims: 
+                  - iss: (string) Must match a known clientId
+                  - iat: (number) (unix timestamp) JWT issued at time
+                  - idx: (number) The index to revoke
+                  - uri: (string) The URI of the status list that holds the issued credential
+                  - jti: (string) JWT ID
+              required: true
         required: true
       responses:
         "202":
           description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum: ["Request processed for revocation"]
+                    description: Status message indicating the result
+                  revokedAt:
+                    type: number
+                    example: 1734709493
+                    description: Unix timestamp when the credential was revoked
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
@@ -66,7 +106,7 @@ paths:
         type: "aws_proxy"
   /t/{statusList}:
     get:
-      description: Retrieve a status list
+      description: Endpoint to get a status list
       parameters:
         - in: path
           name: statusList
@@ -88,7 +128,22 @@ paths:
             application/json:
               schema:
                 type: string
-                example: "eyJ..."
+                example: "eyJ.."
+                description: |
+                  Status list JWT
+                  Required header claims:
+                    - alg: (string) Algorithm used for signing the JWT ("ES256")
+                    - typ: (string) Type of the token ("statuslist+jwt")
+                    - kid: (string) Key ID used to identify the signing key in the status list JWKS endpoint
+                  Required payload claims: 
+                    - iss: (string) Status list URL
+                    - iat: (number) (unix timestamp) JWT issued at time
+                    - exp: (number) (unix timestamp) JWT expiration time (iat + ttl)
+                    - status_list: (object)
+                    - status_list.bits: (number) Number of bits per token in the status list (2)
+                    - status_list.lst: (string) Status values for all the tokens this list conveys statuses for
+                    - sub: (string) The URI of the status list that holds the issued credential
+                    - ttl: (string) JWT time to live
         "500":
           description: Internal Server Error
       x-amazon-apigateway-integration:
@@ -115,7 +170,7 @@ paths:
         type: "aws"
   /.well-known/jwks.json:
     get:
-      description: Retrieve the public keys in JWKS format
+      description: Endpoint to retrieve public keys in JWKS format
       responses:
         "200":
           description: OK
