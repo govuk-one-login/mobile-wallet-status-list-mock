@@ -49,14 +49,14 @@ describe("handler", () => {
       }),
     });
     expect(sign).toHaveBeenCalledWith(
-      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemNBRUFBTVlBaFEifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyIsInR0bCI6MjU5MjAwMH0",
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwiaXNzIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbSIsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcHpjQUVBQU1ZQWhRIn0sInN1YiI6Imh0dHBzOi8vdGVzdC1zdGF0dXMtbGlzdC5jb20vdC8zNjk0MDE5MC1lNmFmLTQyZDAtOTE4MS03NGM5NDRkYzRhZjciLCJ0dGwiOjI1OTIwMDB9",
       "test-key-id",
     );
     expect(derToJose).toHaveBeenCalledWith("AQID", "ES256");
     expect(putObject).toHaveBeenCalledWith(
       "test-bucket-name",
       "t/36940190-e6af-42d0-9181-74c944dc4af7",
-      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemNBRUFBTVlBaFEifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyIsInR0bCI6MjU5MjAwMH0.mockJoseSignature",
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjE3NTU3MzQ0MDAsImV4cCI6MTc1ODMyNjQwMCwiaXNzIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbSIsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcHpjQUVBQU1ZQWhRIn0sInN1YiI6Imh0dHBzOi8vdGVzdC1zdGF0dXMtbGlzdC5jb20vdC8zNjk0MDE5MC1lNmFmLTQyZDAtOTE4MS03NGM5NDRkYzRhZjciLCJ0dGwiOjI1OTIwMDB9.mockJoseSignature",
     );
     expect(logger.addContext).toHaveBeenCalledWith(mockContext);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.ISSUE_LAMBDA_STARTED);

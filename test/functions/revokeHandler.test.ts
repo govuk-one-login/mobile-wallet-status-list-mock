@@ -22,6 +22,7 @@ jest.mock("ecdsa-sig-formatter");
 
 process.env.SIGNING_KEY_ID = "test-key-id";
 process.env.STATUS_LIST_BUCKET_NAME = "test-bucket-name";
+process.env.SELF_URL = "https://test-status-list.com";
 
 describe("handler", () => {
   const jwt =
@@ -58,7 +59,7 @@ describe("handler", () => {
     expect(putObject).toHaveBeenCalledWith(
       "test-bucket-name",
       "t/36940190-e6af-42d0-9181-74c944dc4af7",
-      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MTIzNzE1OTg5MCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5xVFN3Y0FBS1VBaGcifSwic3ViIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbS90LzM2OTQwMTkwLWU2YWYtNDJkMC05MTgxLTc0Yzk0NGRjNGFmNyIsInR0bCI6MjU5MjAwMH0.mockJoseSignature",
+      "eyJhbGciOiJFUzI1NiIsImtpZCI6InRlc3Qta2V5LWlkIiwidHlwIjoic3RhdHVzbGlzdCtqd3QifQ.eyJpYXQiOjEyMzQ1Njc4OTAsImV4cCI6MTIzNzE1OTg5MCwiaXNzIjoiaHR0cHM6Ly90ZXN0LXN0YXR1cy1saXN0LmNvbSIsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcVRTd2NBQUtVQWhnIn0sInN1YiI6Imh0dHBzOi8vdGVzdC1zdGF0dXMtbGlzdC5jb20vdC8zNjk0MDE5MC1lNmFmLTQyZDAtOTE4MS03NGM5NDRkYzRhZjciLCJ0dGwiOjI1OTIwMDB9.mockJoseSignature",
     );
     expect(logger.addContext).toHaveBeenCalledWith(mockContext);
     expect(logger.info).toHaveBeenCalledWith(LogMessage.REVOKE_LAMBDA_STARTED);

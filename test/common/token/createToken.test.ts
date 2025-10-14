@@ -19,10 +19,16 @@ const mockKeyId = "test-key-id";
 const mockUri =
   "https://test-status-list.com/t/36940190-e6af-42d0-9181-74c944dc4af7";
 const mockStatusList: StatusList = { bits: 32, lst: "testList" };
+const selfUrl = "https://test-status-list.com";
 
 describe("createToken", () => {
   it("should create a valid token", async () => {
-    const token = await createToken(mockStatusList, mockUri, mockKeyId);
+    const token = await createToken({
+      selfUrl: selfUrl,
+      statusList: mockStatusList,
+      uri: mockUri,
+      keyId: mockKeyId,
+    });
     expect(token).toBeDefined();
     expect(token).toContain(".");
     expect(token.split(".").length).toBe(3);
@@ -30,17 +36,27 @@ describe("createToken", () => {
 
   it("should encode header and payload correctly", async () => {
     const header = buildHeader(mockKeyId);
-    const payload = buildPayload(mockStatusList, mockUri);
+    const payload = buildPayload(selfUrl, mockStatusList, mockUri);
     const encodedHeader = base64Encoder(JSON.stringify(header));
     const encodedPayload = base64Encoder(JSON.stringify(payload));
-    const token = await createToken(mockStatusList, mockUri, mockKeyId);
+    const token = await createToken({
+      selfUrl: selfUrl,
+      statusList: mockStatusList,
+      uri: mockUri,
+      keyId: mockKeyId,
+    });
     const [tokenHeader, tokenPayload] = token.split(".").slice(0, 2);
     expect(tokenHeader).toBe(encodedHeader);
     expect(tokenPayload).toBe(encodedPayload);
   });
 
   it("should include correct timestamp and TTL in payload", async () => {
-    const token = await createToken(mockStatusList, mockUri, mockKeyId);
+    const token = await createToken({
+      selfUrl: selfUrl,
+      statusList: mockStatusList,
+      uri: mockUri,
+      keyId: mockKeyId,
+    });
     const payload = JSON.parse(
       Buffer.from(token.split(".")[1], "base64url").toString(),
     );
@@ -62,10 +78,11 @@ describe("Helper Functions", () => {
   });
 
   it("should build a correct payload", () => {
-    const payload = buildPayload(mockStatusList, mockUri);
+    const payload = buildPayload(selfUrl, mockStatusList, mockUri);
     const timestamp = Math.floor(Date.now() / 1000);
     expect(payload).toEqual({
       iat: timestamp,
+      iss: "https://test-status-list.com",
       exp: timestamp + TTL,
       status_list: mockStatusList,
       sub: mockUri,
