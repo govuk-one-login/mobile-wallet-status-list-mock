@@ -272,11 +272,6 @@ Resources:
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
                 Resource: '*'
-                Condition: {
-                  "StringEquals": {
-                    "aws:CalledViaLast": "lambda.amazonaws.com"
-                  }
-                }
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
@@ -382,11 +377,6 @@ Resources:
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
                 Resource: '*'
-                Condition: {
-                  "StringEquals": {
-                    "aws:CalledViaLast": "lambda.amazonaws.com"
-                  }
-                }
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
@@ -489,11 +479,6 @@ Resources:
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
                 Resource: '*'
-                Condition: {
-                  "StringEquals": {
-                    "aws:CalledViaLast": "lambda.amazonaws.com"
-                  }
-                }
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
