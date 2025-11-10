@@ -1,0 +1,13 @@
+services:
+  localstack:
+    container_name: localstack_statusListMock
+    image: localstack/localstack:latest
+    ports:
+      - "4562:4566"
+    environment:
+      - SERVICES=kms,s3,lambda
+      - AWS_ACCESS_KEY_ID=na
+      - AWS_SECRET_ACCESS_KEY=na
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - ./localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh

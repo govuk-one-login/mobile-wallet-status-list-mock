@@ -5,8 +5,10 @@ import {
   SignCommandInput,
   KMSClient,
 } from "@aws-sdk/client-kms";
+import { getKmsConfig } from "../../config/aws";
 
-const kmsClient = new KMSClient();
+const config = getKmsConfig(process.env.ENVIRONMENT === "local");
+const kmsClient = new KMSClient(config);
 
 export async function getPublicKey(
   keyId: string,
