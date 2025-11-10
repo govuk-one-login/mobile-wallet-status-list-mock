@@ -6,12 +6,17 @@
     "node": "22"
   },
   "scripts": {
-    "test": "./node_modules/.bin/jest --silent",
-    "lint": "./node_modules/.bin/eslint ./src/functions",
+    "build": "sam build --template template.yaml",
     "format": "./node_modules/.bin/prettier --write '**/*.ts' 'api-spec.yaml'",
+    "lint": "./node_modules/.bin/eslint ./src/functions",
     "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",
     "infra:format": "rain fmt --write template.yaml",
-    "infra:format:check": "rain fmt --verify template.yaml"
+    "infra:format:check": "rain fmt --verify template.yaml",
+    "invoke:JwksFunction": "sam local invoke JwksFunction --template .aws-sam/build/template.yaml --env-vars parameters.json",
+    "localstack:down": "docker compose -f localstack/docker-compose.yml down",
+    "localstack:up": "docker compose -f localstack/docker-compose.yml up --build -d --wait",
+    "start:local": "npm run localstack:up && npm run invoke:JwksFunction && sam local start-api --template .aws-sam/build/template.yaml --warm-containers EAGER --env-vars parameters.json -p 6060",
+    "test": "./node_modules/.bin/jest --silent"
   },
   "license": "MIT",
   "devDependencies": {

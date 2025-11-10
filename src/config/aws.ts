@@ -14,15 +14,15 @@ export interface Credentials {
 }
 
 const AWS_REGION = "eu-west-2";
-const LOCALSTACK_ENDPOINT = "http://localhost:4562";
-const LOCALSTACK_S3_ENDPOINT = "http://s3.localhost.localstack.cloud:4562";
+const LOCALSTACK_ENDPOINT = "http://host.docker.internal:4566";
+// const LOCALSTACK_S3_ENDPOINT = "http://s3.host.docker.internal.localstack.cloud:4566";
 
 export function getLocalStackAwsConfig(endpoint: string): LocalStackAwsConfig {
   return {
     endpoint: endpoint,
     credentials: {
-      accessKeyId: "accessKeyId",
-      secretAccessKey: "secretAccessKey",
+      accessKeyId: "na",
+      secretAccessKey: "na",
     },
     region: AWS_REGION,
   };
@@ -42,7 +42,10 @@ export function getKmsConfig(
 export function getS3Config(isLocal: boolean): S3ClientConfig {
   if (isLocal) {
     logger.info("Running S3 locally");
-    return getLocalStackAwsConfig(LOCALSTACK_S3_ENDPOINT);
+    return {
+      ...getLocalStackAwsConfig(LOCALSTACK_ENDPOINT),
+      forcePathStyle: true,
+    };
   }
 
   return {};
