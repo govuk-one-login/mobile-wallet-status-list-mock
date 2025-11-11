@@ -1,39 +1,26 @@
 import { KMSClientConfig } from "@aws-sdk/client-kms";
 import { S3ClientConfig } from "@aws-sdk/client-s3";
-import { logger } from "../logging/logger";
 
-export interface LocalStackAwsConfig {
+type AwsBaseClientConfig = {
   endpoint: string;
-  credentials: Credentials;
+  credentials: { accessKeyId: string; secretAccessKey: string };
   region: string;
-}
+};
 
-export interface Credentials {
-  accessKeyId: string;
-  secretAccessKey: string;
-}
-
-const AWS_REGION = "eu-west-2";
-const LOCALSTACK_ENDPOINT = "http://host.docker.internal:4566";
-// const LOCALSTACK_S3_ENDPOINT = "http://s3.host.docker.internal.localstack.cloud:4566";
-
-export function getLocalStackAwsConfig(endpoint: string): LocalStackAwsConfig {
+export function getLocalStackAwsClientConfig(): AwsBaseClientConfig {
   return {
-    endpoint: endpoint,
+    endpoint: "http://host.docker.internal:4566",
     credentials: {
-      accessKeyId: "na",
-      secretAccessKey: "na",
+      accessKeyId: "test",
+      secretAccessKey: "test",
     },
-    region: AWS_REGION,
+    region: "eu-west-2",
   };
 }
 
-export function getKmsConfig(
-  isLocal: boolean,
-): LocalStackAwsConfig | KMSClientConfig {
+export function getKmsConfig(isLocal: boolean): KMSClientConfig {
   if (isLocal) {
-    logger.info("Running KMS locally");
-    return getLocalStackAwsConfig(LOCALSTACK_ENDPOINT);
+    return getLocalStackAwsClientConfig();
   }
 
   return {};
@@ -41,9 +28,8 @@ export function getKmsConfig(
 
 export function getS3Config(isLocal: boolean): S3ClientConfig {
   if (isLocal) {
-    logger.info("Running S3 locally");
     return {
-      ...getLocalStackAwsConfig(LOCALSTACK_ENDPOINT),
+      ...getLocalStackAwsClientConfig(),
       forcePathStyle: true,
     };
   }
