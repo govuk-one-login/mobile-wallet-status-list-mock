@@ -13,7 +13,7 @@ results/
 .idea
 
 # Ignore changes to .env
-.env
+.env.json
 
 # IntelliJ IDEA
 *.iml
