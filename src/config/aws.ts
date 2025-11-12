@@ -9,7 +9,9 @@ type AwsBaseClientConfig = {
 
 export function getLocalStackAwsClientConfig(): AwsBaseClientConfig {
   return {
-    endpoint: "http://host.docker.internal:4562",
+    endpoint: "http://host.docker.internal:4562", // NOSONAR: This endpoint is for internal Docker host
+    // communication within a local environment. HTTPS is not supported for 'host.docker.internal' and
+    // the communication is not exposed externally, hence using HTTP instead of HTTPS is acceptable.
     credentials: {
       accessKeyId: "test",
       secretAccessKey: "test",
