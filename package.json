@@ -7,6 +7,7 @@
   },
   "scripts": {
     "build": "sam build --template template.yaml",
+    "dev": "npm run localstack:up && npm run invoke:JwksFunction && npm run start:api",
     "format": "./node_modules/.bin/prettier --write '**/*.ts' 'api-spec.yaml'",
     "lint": "./node_modules/.bin/eslint ./src/functions",
     "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",
@@ -16,7 +17,6 @@
     "localstack:down": "docker compose -f localstack/docker-compose.yml down",
     "localstack:up": "docker compose -f localstack/docker-compose.yml up --build -d --wait",
     "start:api": "sam local start-api --template .aws-sam/build/template.yaml --warm-containers EAGER --env-vars .env.json --port 3000",
-    "start:local": "npm run localstack:up && npm run invoke:JwksFunction && npm run start:api",
     "test": "./node_modules/.bin/jest --silent"
   },
   "license": "MIT",
