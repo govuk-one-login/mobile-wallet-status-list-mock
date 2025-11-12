@@ -5,7 +5,7 @@ import {
 } from "../../src/config/aws";
 
 const AWS_REGION = "eu-west-2";
-const LOCALSTACK_ENDPOINT = "http://host.docker.internal:4566";
+const LOCALSTACK_ENDPOINT = "http://host.docker.internal:4562";
 
 describe("getLocalStackAwsClientConfig", () => {
   it("should return LocalStack AWS client config object", () => {

@@ -9,7 +9,7 @@ type AwsBaseClientConfig = {
 
 export function getLocalStackAwsClientConfig(): AwsBaseClientConfig {
   return {
-    endpoint: "http://host.docker.internal:4566",
+    endpoint: "http://host.docker.internal:4562",
     credentials: {
       accessKeyId: "test",
       secretAccessKey: "test",

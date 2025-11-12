@@ -3,7 +3,7 @@ services:
     container_name: localstack_statusListMock
     image: localstack/localstack:latest
     ports:
-      - "4566:4566"
+      - "4562:4566"
     environment:
       - SERVICES=kms,s3
       - AWS_ACCESS_KEY_ID=test
