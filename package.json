@@ -15,7 +15,8 @@
     "invoke:JwksFunction": "sam local invoke JwksFunction --template .aws-sam/build/template.yaml --env-vars .env.json",
     "localstack:down": "docker compose -f localstack/docker-compose.yml down",
     "localstack:up": "docker compose -f localstack/docker-compose.yml up --build -d --wait",
-    "start:local": "npm run localstack:up && npm run invoke:JwksFunction && sam local start-api --template .aws-sam/build/template.yaml --warm-containers EAGER --env-vars .env.json --port 3000",
+    "start:api": "sam local start-api --template .aws-sam/build/template.yaml --warm-containers EAGER --env-vars .env.json --port 3000",
+    "start:local": "npm run localstack:up && npm run invoke:JwksFunction && npm run start:api",
     "test": "./node_modules/.bin/jest --silent"
   },
   "license": "MIT",
