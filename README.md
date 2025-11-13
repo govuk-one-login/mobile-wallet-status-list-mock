@@ -45,7 +45,7 @@ npm run build
 
 ### Run Locally
 
-Copy `env.json.example` to `env.json`. This is your local environment configuration file.
+Copy `.env.json.example` to `.env.json`. This is your local environment configuration file.
 
 *N.B.* Ensure Docker daemon is running first.
 
