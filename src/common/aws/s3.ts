@@ -1,6 +1,8 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getS3Config } from "../../config/aws";
 
-const s3Client = new S3Client();
+const config = getS3Config(process.env.ENVIRONMENT === "local");
+const s3Client = new S3Client(config);
 
 export async function putObject(
   bucket: string,

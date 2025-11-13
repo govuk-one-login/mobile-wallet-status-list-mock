@@ -10,7 +10,7 @@ paths:
       description: Endpoint to issue credentials
       requestBody:
         content:
-          application/json:
+          application/jwt:
             schema:
               type: string
               example: "eyJ..."
@@ -47,7 +47,7 @@ paths:
           description: Internal Server Error
       x-amazon-apigateway-integration:
         requestTemplates:
-          application/json:
+          application/jwt:
             statusCode: 200
         httpMethod: "POST"
         passthroughBehavior: "when_no_match"
@@ -59,7 +59,7 @@ paths:
       description: Endpoint to revoke credentials
       requestBody:
         content:
-          application/json:
+          application/jwt:
             schema:
               type: string
               example: "eyJ..."
@@ -100,8 +100,8 @@ paths:
           description: Internal Server Error
       x-amazon-apigateway-integration:
         requestTemplates:
-          application/json:
-            statusCode: 200
+          application/jwt:
+            statusCode: 202
         httpMethod: "POST"
         passthroughBehavior: "when_no_match"
         uri:

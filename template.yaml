@@ -50,6 +50,10 @@ Conditions:
       - !Ref CodeSigningConfigArn
       - none
 
+  IsLocal: !Equals
+    - !Ref Environment
+    - local
+
 Transform: AWS::Serverless-2016-10-31
 
 Globals:
@@ -78,6 +82,8 @@ Globals:
       LogFormat: JSON
     Environment:
       Variables:
+        ENVIRONMENT: !Sub ${Environment}
+        SIGNING_KEY_ID: !Ref SigningKey
         DT_CONNECTION_AUTH_TOKEN: !Sub
           - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
           - SecretArn: !FindInMap
@@ -110,7 +116,10 @@ Globals:
               - DynatraceSecretArn
         DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
     Layers:
-      - arn:aws:lambda:eu-west-2:216552277552:layer:Dynatrace_OneAgent_1_311_2_20250307-045250_with_collector_nodejs:1
+      - !If
+        - IsLocal
+        - !Ref AWS::NoValue
+        - arn:aws:lambda:eu-west-2:216552277552:layer:Dynatrace_OneAgent_1_311_2_20250307-045250_with_collector_nodejs:1
 
 Resources:
   Api:
@@ -191,10 +200,12 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: Issue
           STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
-          SIGNING_KEY_ID: !Ref SigningKey
           SELF_URL: !Sub
-            - "https://${SelfUrl}"
-            - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+            - https://${SelfUrl}
+            - SelfUrl: !FindInMap
+                - EnvironmentVariables
+                - !Ref Environment
+                - SelfUrl
       Events:
         IssueIndex:
           Type: Api
@@ -272,11 +283,9 @@ Resources:
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
                 Resource: '*'
-                Condition: {
-                  "StringEquals": {
-                    "aws:CalledViaLast": "lambda.amazonaws.com"
-                  }
-                }
+                Condition:
+                  StringEquals:
+                    aws:CalledViaLast: lambda.amazonaws.com
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
@@ -314,10 +323,12 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: Revoke
           STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
-          SIGNING_KEY_ID: !Ref SigningKey
           SELF_URL: !Sub
-            - "https://${SelfUrl}"
-            - SelfUrl: !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+            - https://${SelfUrl}
+            - SelfUrl: !FindInMap
+                - EnvironmentVariables
+                - !Ref Environment
+                - SelfUrl
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -385,11 +396,9 @@ Resources:
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
                 Resource: '*'
-                Condition: {
-                  "StringEquals": {
-                    "aws:CalledViaLast": "lambda.amazonaws.com"
-                  }
-                }
+                Condition:
+                  StringEquals:
+                    aws:CalledViaLast: lambda.amazonaws.com
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
@@ -417,7 +426,6 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: JWKS
-          SIGNING_KEY_ID: !Ref SigningKey
           JWKS_BUCKET_NAME: !Ref JwksBucket
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
@@ -492,11 +500,9 @@ Resources:
                   - ec2:CreateNetworkInterface
                   - ec2:DeleteNetworkInterface
                 Resource: '*'
-                Condition: {
-                  "StringEquals": {
-                    "aws:CalledViaLast": "lambda.amazonaws.com"
-                  }
-                }
+                Condition:
+                  StringEquals:
+                    aws:CalledViaLast: lambda.amazonaws.com
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
