@@ -1,12 +1,13 @@
-import { JsonWebKey } from "node:crypto";
-
 export type JWKS = {
   keys: JWK[];
 };
 
-export interface JWK extends JsonWebKey {
+export interface JWK {
   alg: string;
   kid: string;
-  kty: "RSA" | "EC";
-  use: "enc" | "sig";
+  kty: "EC";
+  use: "sig";
+  x: string;
+  y: string;
+  crv: string;
 }

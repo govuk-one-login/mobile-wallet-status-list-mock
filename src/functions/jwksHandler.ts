@@ -33,7 +33,7 @@ export async function handler(
 }
 
 function convertToJwk(spki: Uint8Array<ArrayBufferLike>, keyId: string): JWK {
-  const publicKey: crypto.JsonWebKey = crypto
+  const publicKey = crypto
     .createPublicKey({
       key: spki as Buffer,
       type: "spki",
