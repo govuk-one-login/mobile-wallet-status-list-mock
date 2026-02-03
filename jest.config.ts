@@ -5,7 +5,11 @@ export default {
   ],
   collectCoverage: true,
   collectCoverageFrom: ["src/**"],
-  coveragePathIgnorePatterns: ["/node-modules/"],
+  coveragePathIgnorePatterns: [
+    "/node-modules/",
+    "src/types/",
+    "src/common/types/",
+  ],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   preset: "ts-jest",
