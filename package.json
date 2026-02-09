@@ -37,10 +37,10 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.30.2",
-    "@aws-sdk/client-kms": "^3.981.0",
-    "@aws-sdk/client-s3": "^3.981.0",
+    "@aws-sdk/client-kms": "^3.985.0",
+    "@aws-sdk/client-s3": "^3.985.0",
     "ecdsa-sig-formatter": "^1.0.11",
-    "esbuild": "^0.27.2",
+    "esbuild": "^0.27.3",
     "tsc": "^2.0.4"
   }
 }
