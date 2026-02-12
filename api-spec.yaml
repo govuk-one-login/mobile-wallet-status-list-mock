@@ -2,49 +2,227 @@ openapi: 3.0.0
 info:
   title: Status List Mock API
   version: 1.0.0
+
+components:
+  schemas:
+    IssueRequest:
+      type: string
+      description: |
+        JOSE signed JWT containing issuer information and status expiry.
+
+        Required header claims:
+          - alg: (string) Algorithm used for signing the JWT (ES256)
+          - typ: (string) Type of the token, should be "JWT"
+          - kid: (string) Key ID used to identify the signing key in the credential issuers JWKS endpoint. This will be used to verify the signature of the JWT.
+
+        Required payload claims:
+          - iss: (string) Issuer: must match a known clientId - As defined in RFC7519
+          - iat: (number) (unix timestamp) Issued At date - As defined in RFC7519
+          - jti: (string) JWT ID: A unique case sensitive string used as a identifier for the JWT, used to prevent replay attacks. Its value must be a lowercase UUID.
+          - statusExpiry: (number) (unix timestamp) A timestamp representing when the moment the issued credential expires. It should not be longer than 1 year from the iat claim
+
+        Example Header and Payload:
+        {
+            "alg": "ES256",
+            "typ": "JWT",
+            "kid": "ab2f3738-03ec-4312-a65e-7f0461a34e7b"
+        },
+        {
+          "iss": "clientId-abcdef",
+          "iat": 1758038912,
+          "jti": "bcea4e51-6eca-4547-8d18-4b971b72c146",
+          "statusExpiry": 1789574909
+        }
+      properties:
+        alg:
+          type: string
+          description: |
+            Algorithm used for signing the JWT (ES256) - Stored in JWT Header
+          example: "ES256"
+        typ:
+          type: string
+          description: |
+            Type of the token, should be "JWT" - Stored in JWT Header
+          example: "JWT"
+        kid:
+          type: string
+          description: |
+            Key ID used to identify the signing key in the credential issuers JWKS endpoint. This will be used to verify the signature of the JWT. - Stored in JWT Header
+          example: "ab2f3738-03ec-4312-a65e-7f0461a34e7b"
+        iss:
+          type: string
+          description: |
+            Issuer: must match a known clientId - As defined in rfc7519
+          example: "clientId-abcdef"
+        iat:
+          type: number
+          description: |
+            (unix timestamp) Issued At date - As defined in rfc7519
+          example: 1758038912
+        statusExpiry:
+          type: number
+          description: |
+            (unix timestamp) A timestamp representing when the moment the issued credential expires. It should not be longer than 1 year from the iat claim
+          example: 1789574909
+        jti:
+          type: string
+          description: |
+            JWT ID: A unique case sensitive string used as a identifier for the JWT, used to prevent replay attacks. Its value must be a lowercase UUID.
+          example: "bcea4e51-6eca-4547-8d18-4b971b72c146"
+      required:
+        - alg
+        - typ
+        - kid
+        - iss
+        - iat
+        - jti
+        - statusExpiry
+      example: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+    IssueResponse:
+      type: object
+      properties:
+        idx:
+          type: number
+          minimum: 0
+          example: 3
+          description: The assigned Status List index. This index position is unique within the Status List identified by the URI
+        uri:
+          type: string
+          example: "https://crs.account.gov.uk/b/A671FED3E9AD"
+          description: The URI of the Status List that holds the issued credential. It is used in combination with the index to retrieve the Status List entry
+      required:
+        - idx
+        - uri
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            [
+              "BAD_REQUEST",
+              "UNAUTHORIZED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "INTERNAL_SERVER_ERROR",
+            ]
+        error_description:
+          type: string
+          description: Detailed error message
+      required:
+        - error
+        - error_description
+
 paths:
   /issue:
     post:
       tags:
         - issue
-      description: Endpoint to issue credentials
+      summary: Issue a new Status List index
+      description: Issue a new index for credential status tracking
       requestBody:
+        description: JOSE signed JWT containing issuer information and status expiry
         content:
           application/jwt:
             schema:
-              type: string
-              example: "eyJ..."
-              description: |
-                JWT containing issuer information and status expiry
-                Required header claims:
-                  - alg: (string) Algorithm used for signing the JWT ("ES256")
-                  - typ: (string) Type of the token ("JWT")
-                  - kid: (string) Key ID used to identify the signing key in the credential issuer JWKS endpoint
-                Required payload claims: 
-                  - iss: (string) Must match a known clientId
-                  - iat: (number) (unix timestamp) JWT issued at time
-                  - statusExpiry: (number) (unix timestamp) Date the issued credential expires
-                  - jti: (string) JWT ID
-              required: true
+              $ref: "#/components/schemas/IssueRequest"
+        required: true
       responses:
         "200":
-          description: OK
+          description: Successful operation
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  idx:
-                    type: number
-                    example: 0
-                  uri:
-                    type: string
-                    example: "https://status-list-mock.mobile.{environment}.account.gov.uk/t/db6ac25a-bbd3-4b4a-b2d1-c75cb92d0ca6"
-                required:
-                  - idx
-                  - uri
-        "500":
-          description: Internal Server Error
+                $ref: "#/components/schemas/IssueResponse"
+        "400":
+          description: Bad request - JWT validation failures and invalid requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_content_type:
+                  summary: Missing Content-Type header
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Content-Type header must be application/jwt"
+                jwt_decode_error:
+                  summary: JWT decoding failure
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Error decoding JWT or converting to JSON"
+                missing_iat:
+                  summary: Missing iat in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No iat in Payload"
+                missing_jti:
+                  summary: Missing jti in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No jti in Payload"
+                missing_status_expiry:
+                  summary: Missing statusExpiry in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No Status Expiry in Payload"
+                invalid_status_expiry:
+                  summary: Invalid statusExpiry value
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Status Expiry in Payload must be a non negative number and represent a future expiry date no more than 1 year from now"
+        "401":
+          description: Unauthorized - Authentication failures
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_kid:
+                  summary: Missing Key ID in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Key ID in Header"
+                invalid_kid:
+                  summary: Invalid Key ID in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Key ID in Header"
+                missing_typ:
+                  summary: Missing typ in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Type in Header"
+                invalid_typ:
+                  summary: Invalid typ in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Type in Header"
+                missing_alg:
+                  summary: Missing alg in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Algorithm in Header"
+                invalid_alg:
+                  summary: Invalid alg in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Algorithm in Header"
+                missing_iss:
+                  summary: Missing iss in payload
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Issuer in Payload"
+                non_matching_client_id:
+                  summary: JWT has non-matching Client ID
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "JWT has non-matching Client ID"
+                non_verified_signature:
+                  summary: Non-verified signature used to sign JWT
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "JWT has non-verified signature"
       x-amazon-apigateway-integration:
         requestTemplates:
           application/jwt:
@@ -52,7 +230,7 @@ paths:
         httpMethod: "POST"
         passthroughBehavior: "when_no_match"
         uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${IssueFunction}:live/invocations"
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IssueStatusFunction.Alias.AliasArn}/invocations"
         type: "aws_proxy"
   /revoke:
     post:
