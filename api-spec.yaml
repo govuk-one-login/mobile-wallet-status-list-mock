@@ -163,7 +163,7 @@ paths:
             description: OK
             responseParameters:
               method.response.header.Content-Type: "'application/json'"
-              method.response.header.Cache-Control: "'max-age=259200'"
+              method.response.header.Cache-Control: "'max-age=3600'"
             contentHandling: "CONVERT_TO_TEXT"
           default:
             statusCode: "500"
