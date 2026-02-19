@@ -2,7 +2,7 @@ import { sign } from "../aws/kms";
 import format from "ecdsa-sig-formatter";
 import { StatusList } from "../types/statusList";
 
-const TTL = 3600;
+const TTL = 2592000;
 const ALGORITHM = "ES256";
 const TYP = "statuslist+jwt";
 

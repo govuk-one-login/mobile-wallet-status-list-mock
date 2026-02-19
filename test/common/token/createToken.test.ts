@@ -13,7 +13,7 @@ jest.mock("ecdsa-sig-formatter");
 jest.mocked(sign).mockResolvedValue(new Uint8Array([1, 2, 3]));
 jest.mocked(derToJose).mockReturnValue("mockJoseSignature");
 
-const TTL = 3600;
+const TTL = 2592000;
 const ALGORITHM = "ES256";
 const mockKeyId = "test-key-id";
 const mockUri =
