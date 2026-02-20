@@ -16,8 +16,7 @@
           "phase": "pre-merge",
           "config": {
             "file": ".github/workflows/pre-merge.yml",
-            "path": "jobs.ci",
-            "name": "CI"
+            "path": "jobs.ci"
           }
         },
         {
@@ -30,8 +29,7 @@
           "phase": "pre-upload",
           "config": {
             "file": ".github/workflows/backend-post-merge.yml",
-            "path": "jobs.cd",
-            "name": "CD"
+            "path": "jobs.cd"
           }
         }
       ]
