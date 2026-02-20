@@ -33,14 +33,14 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.55.0"
   },
   "dependencies": {
-    "@aws-lambda-powertools/logger": "^2.30.2",
-    "@aws-sdk/client-kms": "^3.981.0",
-    "@aws-sdk/client-s3": "^3.981.0",
+    "@aws-lambda-powertools/logger": "^2.31.0",
+    "@aws-sdk/client-kms": "^3.990.0",
+    "@aws-sdk/client-s3": "^3.990.0",
     "ecdsa-sig-formatter": "^1.0.11",
-    "esbuild": "^0.27.2",
+    "esbuild": "^0.27.3",
     "tsc": "^2.0.4"
   }
 }
