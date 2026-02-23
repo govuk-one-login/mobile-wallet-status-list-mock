@@ -21,6 +21,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/aws-lambda": "^8.10.160",
     "@types/jest": "^30.0.0",
     "aws-sdk-client-mock": "^4.1.0",
