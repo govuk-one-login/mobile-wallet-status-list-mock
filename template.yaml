@@ -157,10 +157,10 @@ Resources:
   ApiCWLRoleArn:
     Type: AWS::ApiGateway::Account
     Properties: 
-      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
+      CloudWatchRoleArn: !GetAtt APIGWCloudWatchRole.Arn
 
 # IAM Role for API Gateway + CloudWatch Logging
-  CloudWatchRole:
+  APIGWCloudWatchRole:
       Type: AWS::IAM::Role
       Properties:
         AssumeRolePolicyDocument:
