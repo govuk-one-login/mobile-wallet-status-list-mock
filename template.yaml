@@ -210,231 +210,231 @@ Resources:
   #     Name: !Ref ApiDomainName
   #     Type: A
 
-  # IssueFunction:
-  #   Type: AWS::Serverless::Function
-  #   DependsOn:
-  #     - IssueFunctionLogGroup
-  #   Metadata:
-  #     BuildMethod: esbuild
-  #     BuildProperties:
-  #       Minify: true
-  #       Target: es2022
-  #       EntryPoints:
-  #         - src/functions/issueHandler.ts
-  #   Properties:
-  #     Environment:
-  #       Variables:
-  #         POWERTOOLS_SERVICE_NAME: Issue
-  #         STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
-  #         SELF_URL: !Sub
-  #           - https://${SelfUrl}
-  #           - SelfUrl: !FindInMap
-  #               - EnvironmentVariables
-  #               - !Ref Environment
-  #               - SelfUrl
-  #     Events:
-  #       IssueIndex:
-  #         Type: Api
-  #         Properties:
-  #           Path: /issue
-  #           Method: post
-  #           RestApiId: !Ref Api
-  #     FunctionName: !Sub ${AWS::StackName}-issue
-  #     Handler: src/functions/issueHandler.handler
-  #     Role: !GetAtt IssueFunctionLambdaRole.Arn
-  #     VpcConfig:
-  #       SecurityGroupIds:
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-  #       SubnetIds:
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+  IssueFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - IssueFunctionLogGroup
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - src/functions/issueHandler.ts
+    Properties:
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Issue
+          STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
+          SELF_URL: !Sub
+            - https://${SelfUrl}
+            - SelfUrl: !FindInMap
+                - EnvironmentVariables
+                - !Ref Environment
+                - SelfUrl
+      Events:
+        IssueIndex:
+          Type: Api
+          Properties:
+            Path: /issue
+            Method: post
+            RestApiId: !Ref Api
+      FunctionName: !Sub ${AWS::StackName}-issue
+      Handler: src/functions/issueHandler.handler
+      Role: !GetAtt IssueFunctionLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
 
-  # IssueFunctionLambdaRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: !Sub ${AWS::StackName}-issue-lambda-role
-  #     AssumeRolePolicyDocument:
-  #       Version: "2012-10-17"
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: lambda.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     ManagedPolicyArns:
-  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-  #     Policies:
-  #       - PolicyName: LoggingPolicy
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - logs:CreateLogGroup
-  #                 - logs:CreateLogStream
-  #                 - logs:PutLogEvents
-  #               Resource: !GetAtt IssueFunctionLogGroup.Arn
-  #       - PolicyName: S3BucketAccess
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - s3:GetObject
-  #                 - s3:PutObject
-  #               Resource:
-  #                 - !Sub
-  #                   - arn:aws:s3:::${TargetBucket}/*
-  #                   - TargetBucket: !Ref StatusListBucket
-  #       - PolicyName: KMSAccess
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - kms:Sign
-  #               Resource: !GetAtt SigningKey.Arn
-  #       - PolicyName: VpcAccessPolicy
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - ec2:DescribeNetworkInterfaces
-  #                 - ec2:CreateNetworkInterface
-  #                 - ec2:DeleteNetworkInterface
-  #               Resource: '*'
-  #               Condition:
-  #                 StringEquals:
-  #                   aws:CalledViaLast: lambda.amazonaws.com
-  #     PermissionsBoundary: !If
-  #       - UsePermissionsBoundary
-  #       - !Ref PermissionsBoundary
-  #       - !Ref AWS::NoValue
+  IssueFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-issue-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: LoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt IssueFunctionLogGroup.Arn
+        - PolicyName: S3BucketAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}/*
+                    - TargetBucket: !Ref StatusListBucket
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Sign
+                Resource: !GetAtt SigningKey.Arn
+        - PolicyName: VpcAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    aws:CalledViaLast: lambda.amazonaws.com
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
 
-  # IssueFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue
-  #     RetentionInDays: 30
+  IssueFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue
+      RetentionInDays: 30
 
-  # RevokeFunction:
-  #   Type: AWS::Serverless::Function
-  #   DependsOn:
-  #     - RevokeFunctionLogGroup
-  #   Metadata:
-  #     BuildMethod: esbuild
-  #     BuildProperties:
-  #       Minify: true
-  #       Target: es2022
-  #       EntryPoints:
-  #         - src/functions/revokeHandler.ts
-  #   Properties:
-  #     Events:
-  #       IssueIndex:
-  #         Type: Api
-  #         Properties:
-  #           Path: /revoke
-  #           Method: post
-  #           RestApiId: !Ref Api
-  #     FunctionName: !Sub ${AWS::StackName}-revoke
-  #     Handler: src/functions/revokeHandler.handler
-  #     Role: !GetAtt RevokeFunctionLambdaRole.Arn
-  #     Environment:
-  #       Variables:
-  #         POWERTOOLS_SERVICE_NAME: Revoke
-  #         STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
-  #         SELF_URL: !Sub
-  #           - https://${SelfUrl}
-  #           - SelfUrl: !FindInMap
-  #               - EnvironmentVariables
-  #               - !Ref Environment
-  #               - SelfUrl
-  #     VpcConfig:
-  #       SecurityGroupIds:
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-  #       SubnetIds:
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
-  #         - !ImportValue
-  #           Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+  RevokeFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - RevokeFunctionLogGroup
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - src/functions/revokeHandler.ts
+    Properties:
+      Events:
+        IssueIndex:
+          Type: Api
+          Properties:
+            Path: /revoke
+            Method: post
+            RestApiId: !Ref Api
+      FunctionName: !Sub ${AWS::StackName}-revoke
+      Handler: src/functions/revokeHandler.handler
+      Role: !GetAtt RevokeFunctionLambdaRole.Arn
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Revoke
+          STATUS_LIST_BUCKET_NAME: !Ref StatusListBucket
+          SELF_URL: !Sub
+            - https://${SelfUrl}
+            - SelfUrl: !FindInMap
+                - EnvironmentVariables
+                - !Ref Environment
+                - SelfUrl
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
 
-  # RevokeFunctionLambdaRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: !Sub ${AWS::StackName}-revoke-lambda-role
-  #     AssumeRolePolicyDocument:
-  #       Version: "2012-10-17"
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             Service: lambda.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     ManagedPolicyArns:
-  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-  #     Policies:
-  #       - PolicyName: LoggingPolicy
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - logs:CreateLogGroup
-  #                 - logs:CreateLogStream
-  #                 - logs:PutLogEvents
-  #               Resource: !GetAtt RevokeFunctionLogGroup.Arn
-  #       - PolicyName: S3BucketAccess
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - s3:GetObject
-  #                 - s3:PutObject
-  #               Resource:
-  #                 - !Sub
-  #                   - arn:aws:s3:::${TargetBucket}/*
-  #                   - TargetBucket: !Ref StatusListBucket
-  #       - PolicyName: KMSAccess
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - kms:Sign
-  #               Resource: !GetAtt SigningKey.Arn
-  #       - PolicyName: VpcAccessPolicy
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - ec2:DescribeNetworkInterfaces
-  #                 - ec2:CreateNetworkInterface
-  #                 - ec2:DeleteNetworkInterface
-  #               Resource: '*'
-  #               Condition:
-  #                 StringEquals:
-  #                   aws:CalledViaLast: lambda.amazonaws.com
-  #     PermissionsBoundary: !If
-  #       - UsePermissionsBoundary
-  #       - !Ref PermissionsBoundary
-  #       - !Ref AWS::NoValue
+  RevokeFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-revoke-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: LoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt RevokeFunctionLogGroup.Arn
+        - PolicyName: S3BucketAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}/*
+                    - TargetBucket: !Ref StatusListBucket
+        - PolicyName: KMSAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Sign
+                Resource: !GetAtt SigningKey.Arn
+        - PolicyName: VpcAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - ec2:DeleteNetworkInterface
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    aws:CalledViaLast: lambda.amazonaws.com
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
 
-  # RevokeFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
-  #     RetentionInDays: 30
+  RevokeFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
+      RetentionInDays: 30
 
   # JwksFunction:
   #   Type: AWS::Serverless::Function
