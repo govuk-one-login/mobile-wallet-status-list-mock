@@ -537,26 +537,26 @@ Resources:
   #       - !Ref PermissionsBoundary
   #       - !Ref AWS::NoValue
 
-  # JwksBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
-  #     VersioningConfiguration:
-  #       Status: Suspended
-  #     PublicAccessBlockConfiguration:
-  #       BlockPublicAcls: true
-  #       BlockPublicPolicy: true
-  #       IgnorePublicAcls: true
-  #       RestrictPublicBuckets: true
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-  #     LoggingConfiguration:
-  #       DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
-  #       TargetObjectKeyFormat:
-  #         PartitionedPrefix:
-  #           PartitionDateSource: EventTime
+  JwksBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
+      VersioningConfiguration:
+        Status: Suspended
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
 
   # JwksBucketPolicy:
   #   Type: AWS::S3::BucketPolicy
@@ -602,32 +602,32 @@ Resources:
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-  # StatusListBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Sub ${AWS::StackName}-${Environment}-status-list
-  #     VersioningConfiguration:
-  #       Status: Suspended
-  #     PublicAccessBlockConfiguration:
-  #       BlockPublicAcls: true
-  #       BlockPublicPolicy: true
-  #       IgnorePublicAcls: true
-  #       RestrictPublicBuckets: true
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-  #     LifecycleConfiguration:
-  #       Rules:
-  #         - Id: RemoveExpired
-  #           Prefix: results/
-  #           ExpirationInDays: 30
-  #           Status: Enabled
-  #     LoggingConfiguration:
-  #       DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
-  #       TargetObjectKeyFormat:
-  #         PartitionedPrefix:
-  #           PartitionDateSource: EventTime
+  StatusListBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${Environment}-status-list
+      VersioningConfiguration:
+        Status: Suspended
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: RemoveExpired
+            Prefix: results/
+            ExpirationInDays: 30
+            Status: Enabled
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
 
   # StatusListBucketPolicy:
   #   Type: AWS::S3::BucketPolicy
