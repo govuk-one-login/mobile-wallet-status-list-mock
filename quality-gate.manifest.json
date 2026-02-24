@@ -27,7 +27,7 @@
           "provider": "GitHub",
           "phase": "pre-upload",
           "config": {
-            "file": ".github/workflows/backend-post-merge.yml",
+            "file": ".github/workflows/post-merge.yml",
             "path": "jobs.cd"
           }
         }
