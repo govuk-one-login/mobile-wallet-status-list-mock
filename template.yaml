@@ -14,6 +14,7 @@ Parameters:
     AllowedValues:
       - dev
       - build
+      - integration
     Default: dev
 
   PermissionsBoundary:
@@ -26,18 +27,22 @@ Parameters:
     Description: |
       The stack name of the VPC where the Lambda functions will be deployed
     Type: String
-    Default: platform-vpc
+    Default: vpc
 
 Mappings:
   EnvironmentVariables:
     dev:
       LambdaLogLevel: DEBUG
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
-      SelfUrl: status-list-mock.mobile.dev.account.gov.uk
+      SelfUrl: status-list-mock.wallet-onboarding.dev.account.gov.uk
     build:
       LambdaLogLevel: INFO
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
-      SelfUrl: status-list-mock.mobile.build.account.gov.uk
+      SelfUrl: status-list-mock.wallet-onboarding.build.account.gov.uk
+    integration:
+      LambdaLogLevel: INFO
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      SelfUrl: status-list-mock.wallet-onboarding.integration.account.gov.uk
 
 Conditions:
   UsePermissionsBoundary: !Not
@@ -524,7 +529,7 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue devplatform-s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
         TargetObjectKeyFormat:
           PartitionedPrefix:
             PartitionDateSource: EventTime
@@ -595,7 +600,7 @@ Resources:
             ExpirationInDays: 30
             Status: Enabled
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue devplatform-s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
         TargetObjectKeyFormat:
           PartitionedPrefix:
             PartitionDateSource: EventTime
