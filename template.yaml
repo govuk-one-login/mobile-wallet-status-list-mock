@@ -576,31 +576,31 @@ Resources:
   #             Bool:
   #               aws:SecureTransport: false
 
-  # JwksBucketApiRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: !Sub ${AWS::StackName}-jwks-bucket-role
-  #     AssumeRolePolicyDocument:
-  #       Statement:
-  #         - Action: sts:AssumeRole
-  #           Effect: Allow
-  #           Principal:
-  #             Service: apigateway.amazonaws.com
-  #       Version: "2012-10-17"
-  #     Policies:
-  #       - PolicyName: JwksBucketPolicy
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - s3:GetObject
-  #               Resource:
-  #                 - !Sub ${JwksBucket.Arn}/.well-known/jwks.json
-  #     PermissionsBoundary: !If
-  #       - UsePermissionsBoundary
-  #       - !Ref PermissionsBoundary
-  #       - !Ref AWS::NoValue
+  JwksBucketApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-jwks-bucket-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyName: JwksBucketPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub ${JwksBucket.Arn}/.well-known/jwks.json
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
 
   # StatusListBucket:
   #   Type: AWS::S3::Bucket
@@ -647,51 +647,51 @@ Resources:
   #             Bool:
   #               aws:SecureTransport: false
 
-  # StatusListBucketApiRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     RoleName: !Sub ${AWS::StackName}-status-list-bucket-role
-  #     AssumeRolePolicyDocument:
-  #       Statement:
-  #         - Action: sts:AssumeRole
-  #           Effect: Allow
-  #           Principal:
-  #             Service: apigateway.amazonaws.com
-  #       Version: "2012-10-17"
-  #     Policies:
-  #       - PolicyName: StatusListBucketPolicy
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - s3:GetObject
-  #               Resource:
-  #                 - !Sub ${StatusListBucket.Arn}/*
-  #     PermissionsBoundary: !If
-  #       - UsePermissionsBoundary
-  #       - !Ref PermissionsBoundary
-  #       - !Ref AWS::NoValue
+  StatusListBucketApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-status-list-bucket-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      Policies:
+        - PolicyName: StatusListBucketPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub ${StatusListBucket.Arn}/*
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
 
-  # SigningKey:
-  #   Type: AWS::KMS::Key
-  #   Properties:
-  #     Description: KMS key for signing JWTs
-  #     Enabled: true
-  #     KeyUsage: SIGN_VERIFY
-  #     KeySpec: ECC_NIST_P256
-  #     EnableKeyRotation: false
-  #     KeyPolicy:
-  #       Version: "2012-10-17"
-  #       Statement:
-  #         - Effect: Allow
-  #           Principal:
-  #             AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-  #           Action: kms:*
-  #           Resource: '*'
+  SigningKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for signing JWTs
+      Enabled: true
+      KeyUsage: SIGN_VERIFY
+      KeySpec: ECC_NIST_P256
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
 
-  # SigningKeyAlias:
-  #   Type: AWS::KMS::Alias
-  #   Properties:
-  #     AliasName: !Sub alias/${AWS::StackName}-SigningKey
-  #     TargetKeyId: !Ref SigningKey
+  SigningKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${AWS::StackName}-SigningKey
+      TargetKeyId: !Ref SigningKey

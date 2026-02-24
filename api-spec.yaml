@@ -39,7 +39,7 @@ paths:
                     example: 0
                   uri:
                     type: string
-                    example: "https://status-list-mock.mobile.{environment}.account.gov.uk/t/db6ac25a-bbd3-4b4a-b2d1-c75cb92d0ca6"
+                    example: "https://status-list-mock.wallet-onboarding.{environment}.account.gov.uk/t/db6ac25a-bbd3-4b4a-b2d1-c75cb92d0ca6"
                 required:
                   - idx
                   - uri
