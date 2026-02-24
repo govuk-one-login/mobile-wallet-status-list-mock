@@ -129,6 +129,7 @@ Globals:
 Resources:
   Api:
     Type: AWS::Serverless::Api
+    DependsOn: ApiCWLRoleArn
     Properties:
       Name: !Sub ${AWS::StackName}-api
       Description: Regional API gateway for the Status List Mock
@@ -152,6 +153,26 @@ Resources:
           Name: AWS::Include
           Parameters:
             Location: ./api-spec.yaml
+
+  ApiCWLRoleArn:
+    Type: AWS::ApiGateway::Account
+    Properties: 
+      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
+
+# IAM Role for API Gateway + CloudWatch Logging
+  CloudWatchRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Path: /
+        ManagedPolicyArns:
+          - 'arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs'
 
   ApiAccessLogs:
     Type: AWS::Logs::LogGroup
