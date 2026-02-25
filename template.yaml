@@ -432,7 +432,7 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: JWKS
-#          JWKS_BUCKET_NAME: !Ref JwksBucket
+          JWKS_BUCKET_NAME: !Ref JwksBucket
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
@@ -480,17 +480,17 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !GetAtt JwksFunctionLogGroup.Arn
-#        - PolicyName: S3BucketAccess
-#          PolicyDocument:
-#            Version: "2012-10-17"
-#            Statement:
-#              - Effect: Allow
-#                Action:
-#                  - s3:PutObject
-#                Resource:
-#                  - !Sub
-#                    - arn:aws:s3:::${TargetBucket}/*
-#                    - TargetBucket: !Ref JwksBucket
+        - PolicyName: S3BucketAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}/*
+                    - TargetBucket: !Ref JwksBucket
 #        - PolicyName: KMSAccess
 #          PolicyDocument:
 #            Version: "2012-10-17"
@@ -517,44 +517,44 @@ Resources:
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-#  JwksBucket:
-#    Type: AWS::S3::Bucket
-#    Properties:
-#      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
-#      VersioningConfiguration:
-#        Status: Suspended
-#      PublicAccessBlockConfiguration:
-#        BlockPublicAcls: true
-#        BlockPublicPolicy: true
-#        IgnorePublicAcls: true
-#        RestrictPublicBuckets: true
-#      BucketEncryption:
-#        ServerSideEncryptionConfiguration:
-#          - ServerSideEncryptionByDefault:
-#              SSEAlgorithm: AES256
-#      LoggingConfiguration:
-#        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
-#        TargetObjectKeyFormat:
-#          PartitionedPrefix:
-#            PartitionDateSource: EventTime
+  JwksBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
+      VersioningConfiguration:
+        Status: Suspended
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
 
-#  JwksBucketPolicy:
-#    Type: AWS::S3::BucketPolicy
-#    Properties:
-#      Bucket: !Ref JwksBucket
-#      PolicyDocument:
-#        Version: "2012-10-17"
-#        Statement:
-#          - Effect: Deny
-#            Principal:
-#              AWS: '*'
-#            Action: '*'
-#            Resource: !Sub
-#              - arn:aws:s3:::${bucketName}/*
-#              - bucketName: !Ref JwksBucket
-#            Condition:
-#              Bool:
-#                aws:SecureTransport: false
+  JwksBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref JwksBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Deny
+            Principal:
+              AWS: '*'
+            Action: '*'
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref JwksBucket
+            Condition:
+              Bool:
+                aws:SecureTransport: false
 
 #  JwksBucketApiRole:
 #    Type: AWS::IAM::Role
