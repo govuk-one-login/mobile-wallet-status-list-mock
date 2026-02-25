@@ -61,70 +61,70 @@ Conditions:
 
 Transform: AWS::Serverless-2016-10-31
 
-#Globals:
-#  Function:
-#    AutoPublishAlias: live
-#    CodeSigningConfigArn: !If
-#      - UseCodeSigning
-#      - !Ref CodeSigningConfigArn
-#      - !Ref AWS::NoValue
-#    MemorySize: 512
-#    PermissionsBoundary: !If
-#      - UsePermissionsBoundary
-#      - !Ref PermissionsBoundary
-#      - !Ref AWS::NoValue
-#    Runtime: nodejs22.x
-#    Timeout: 15
-#    LoggingConfig:
-#      ApplicationLogLevel: !FindInMap
-#        - EnvironmentVariables
-#        - !Ref Environment
-#        - LambdaLogLevel
-#      SystemLogLevel: !FindInMap
-#        - EnvironmentVariables
-#        - !Ref Environment
-#        - LambdaLogLevel
-#      LogFormat: JSON
-#    Environment:
-#      Variables:
-#        ENVIRONMENT: !Sub ${Environment}
+Globals:
+  Function:
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    MemorySize: 512
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+    Runtime: nodejs22.x
+    Timeout: 15
+    LoggingConfig:
+      ApplicationLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      SystemLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      LogFormat: JSON
+    Environment:
+      Variables:
+        ENVIRONMENT: !Sub ${Environment}
 #        SIGNING_KEY_ID: !Ref SigningKey
-#        DT_CONNECTION_AUTH_TOKEN: !Sub
-#          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
-#          - SecretArn: !FindInMap
-#              - EnvironmentVariables
-#              - !Ref Environment
-#              - DynatraceSecretArn
-#        DT_CONNECTION_BASE_URL: !Sub
-#          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
-#          - SecretArn: !FindInMap
-#              - EnvironmentVariables
-#              - !Ref Environment
-#              - DynatraceSecretArn
-#        DT_CLUSTER_ID: !Sub
-#          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
-#          - SecretArn: !FindInMap
-#              - EnvironmentVariables
-#              - !Ref Environment
-#              - DynatraceSecretArn
-#        DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
-#          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
-#          - SecretArn: !FindInMap
-#              - EnvironmentVariables
-#              - !Ref Environment
-#              - DynatraceSecretArn
-#        DT_TENANT: !Sub
-#          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
-#          - SecretArn: !FindInMap
-#              - EnvironmentVariables
-#              - !Ref Environment
-#              - DynatraceSecretArn
-#        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
-#    Layers:
-#      - !If
-#        - IsLocal
-#        - !Ref AWS::NoValue
-#        - arn:aws:lambda:eu-west-2:216552277552:layer:Dynatrace_OneAgent_1_311_2_20250307-045250_with_collector_nodejs:1
+        DT_CONNECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_BASE_URL: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CLUSTER_ID: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_TENANT: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
+    Layers:
+      - !If
+        - IsLocal
+        - !Ref AWS::NoValue
+        - arn:aws:lambda:eu-west-2:216552277552:layer:Dynatrace_OneAgent_1_311_2_20250307-045250_with_collector_nodejs:1
 
 Resources:
 #  Api:
@@ -432,7 +432,7 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: JWKS
-          JWKS_BUCKET_NAME: !Ref JwksBucket
+#          JWKS_BUCKET_NAME: !Ref JwksBucket
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
@@ -469,36 +469,36 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-      Policies:
-        - PolicyName: LoggingPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: !GetAtt JwksFunctionLogGroup.Arn
-        - PolicyName: S3BucketAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                Resource:
-                  - !Sub
-                    - arn:aws:s3:::${TargetBucket}/*
-                    - TargetBucket: !Ref JwksBucket
-        - PolicyName: KMSAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - kms:GetPublicKey
-                Resource: !GetAtt SigningKey.Arn
+#      Policies:
+#        - PolicyName: LoggingPolicy
+#          PolicyDocument:
+#            Version: "2012-10-17"
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - logs:CreateLogGroup
+#                  - logs:CreateLogStream
+#                  - logs:PutLogEvents
+#                Resource: !GetAtt JwksFunctionLogGroup.Arn
+#        - PolicyName: S3BucketAccess
+#          PolicyDocument:
+#            Version: "2012-10-17"
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - s3:PutObject
+#                Resource:
+#                  - !Sub
+#                    - arn:aws:s3:::${TargetBucket}/*
+#                    - TargetBucket: !Ref JwksBucket
+#        - PolicyName: KMSAccess
+#          PolicyDocument:
+#            Version: "2012-10-17"
+#            Statement:
+#              - Effect: Allow
+#                Action:
+#                  - kms:GetPublicKey
+#                Resource: !GetAtt SigningKey.Arn
         - PolicyName: VpcAccessPolicy
           PolicyDocument:
             Version: "2012-10-17"
