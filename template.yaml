@@ -432,7 +432,7 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: JWKS
-          JWKS_BUCKET_NAME: !Ref JwksBucket
+          # JWKS_BUCKET_NAME: !Ref JwksBucket
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
