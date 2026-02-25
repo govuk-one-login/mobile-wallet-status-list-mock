@@ -418,8 +418,8 @@ Resources:
 
   JwksFunction:
     Type: AWS::Serverless::Function
-#    DependsOn:
-#      - JwksFunctionLogGroup
+    DependsOn:
+     - JwksFunctionLogGroup
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -448,11 +448,11 @@ Resources:
           - !ImportValue
             Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
 
-#  JwksFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-jwks
-#      RetentionInDays: 30
+  JwksFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-jwks
+      RetentionInDays: 30
 
   JwksFunctionLambdaRole:
     Type: AWS::IAM::Role
@@ -470,16 +470,16 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
-#        - PolicyName: LoggingPolicy
-#          PolicyDocument:
-#            Version: "2012-10-17"
-#            Statement:
-#              - Effect: Allow
-#                Action:
-#                  - logs:CreateLogGroup
-#                  - logs:CreateLogStream
-#                  - logs:PutLogEvents
-#                Resource: !GetAtt JwksFunctionLogGroup.Arn
+        - PolicyName: LoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt JwksFunctionLogGroup.Arn
 #        - PolicyName: S3BucketAccess
 #          PolicyDocument:
 #            Version: "2012-10-17"
