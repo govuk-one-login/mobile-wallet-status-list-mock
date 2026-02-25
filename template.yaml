@@ -538,23 +538,23 @@ Resources:
           PartitionedPrefix:
             PartitionDateSource: EventTime
 
-  JwksBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref JwksBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Deny
-            Principal:
-              AWS: '*'
-            Action: '*'
-            Resource: !Sub
-              - arn:aws:s3:::${bucketName}/*
-              - bucketName: !Ref JwksBucket
-            Condition:
-              Bool:
-                aws:SecureTransport: false
+  # JwksBucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     Bucket: !Ref JwksBucket
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Deny
+  #           Principal:
+  #             AWS: '*'
+  #           Action: '*'
+  #           Resource: !Sub
+  #             - arn:aws:s3:::${bucketName}/*
+  #             - bucketName: !Ref JwksBucket
+  #           Condition:
+  #             Bool:
+  #               aws:SecureTransport: false
 
 #  JwksBucketApiRole:
 #    Type: AWS::IAM::Role
