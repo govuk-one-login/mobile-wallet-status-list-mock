@@ -9,7 +9,9 @@
             "code quality",
             "code style and linting",
             "unit test coverage",
-            "unit"
+            "unit",
+            "vulnerability detection",
+            "secret scanning"
           ],
           "provider": "GitHub",
           "phase": "pre-merge",
@@ -22,7 +24,9 @@
           "check-types": [
             "code style and linting",
             "unit",
-            "code quality"
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"
           ],
           "provider": "GitHub",
           "phase": "pre-upload",
