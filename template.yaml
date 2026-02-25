@@ -520,7 +520,7 @@ Resources:
   JwksBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
+      BucketName: !Sub ${AWS::StackName}-${Environment}-${AWS::AccountId}-jwks
       VersioningConfiguration:
         Status: Suspended
       PublicAccessBlockConfiguration:
