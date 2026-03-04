@@ -465,6 +465,9 @@ Resources:
               Service: lambda.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
         - PolicyName: LoggingPolicy
           PolicyDocument:
@@ -516,7 +519,7 @@ Resources:
   JwksBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${AWS::StackName}-${Environment}-jwks
+      BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-jwks
       VersioningConfiguration:
         Status: Suspended
       PublicAccessBlockConfiguration:
@@ -581,7 +584,7 @@ Resources:
   StatusListBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${AWS::StackName}-${Environment}-status-list
+      BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-status-list
       VersioningConfiguration:
         Status: Suspended
       PublicAccessBlockConfiguration:
