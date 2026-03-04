@@ -59,3 +59,15 @@ This command will:
 - Run the JwksFunction, InvokeFunction and RevokeFunction Lambda functions locally to test through a local HTTP server host.
 
 The status list mock will be available at http://localhost:3000.
+
+
+#### Accessing Status List Tokens locally
+
+The `/t/{id}` endpoint uses an API Gateway S3 proxy integration to retrieve status list tokens directly from S3. Due to a limitation in `sam local start-api`, this endpoint will not work when running locally.
+To retrieve status list tokens locally, use the AWS CLI with the LocalStack endpoint:
+
+```
+aws --endpoint-url=http://localhost:4562 s3 cp s3://status-list/t/{id} -
+```
+
+Replace `{id}` with the actual token ID (e.g., `81d8809a-79c3-45b3-9fa1-4108c49f240c`).
