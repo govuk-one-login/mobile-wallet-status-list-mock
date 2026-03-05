@@ -61,13 +61,17 @@ This command will:
 The status list mock will be available at http://localhost:3000.
 
 
-#### Accessing Status List Tokens locally
+#### Accessing S3 Resources Locally
 
-The `/t/{id}` endpoint uses an API Gateway S3 proxy integration to retrieve status list tokens directly from S3. Due to a limitation in `sam local start-api`, this endpoint will not work when running locally.
-To retrieve status list tokens locally, use the AWS CLI with the LocalStack endpoint:
+The `/t/{id}` and `/.well-known/jwks.json` endpoints use API Gateway S3 proxy integrations. Due to a limitation in `sam local start-api`, these endpoints will not work when running locally.
 
-```
+To retrieve these resources locally, use the AWS CLI with the LocalStack endpoint:
+
+```bash
+# Get JWKS
+aws --endpoint-url=http://localhost:4562 s3 cp s3://jwks/.well-known/jwks.json -
+
+# Get status list token
 aws --endpoint-url=http://localhost:4562 s3 cp s3://status-list/t/{id} -
-```
 
 Replace `{id}` with the actual token ID (e.g., `81d8809a-79c3-45b3-9fa1-4108c49f240c`).
