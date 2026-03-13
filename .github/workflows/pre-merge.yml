@@ -69,3 +69,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
+  check-oas-for-drift:
+    name: Check Status List OAS for drift
+    uses: ./.github/workflows/check-oas-for-drift.yml

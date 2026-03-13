@@ -8,7 +8,7 @@
   "scripts": {
     "build": "sam build --template template.yaml",
     "dev": "npm run localstack:up && npm run invoke:JwksFunction && npm run start:api",
-    "format": "./node_modules/.bin/prettier --write '**/*.ts' 'api-spec.yaml'",
+    "format": "./node_modules/.bin/prettier --write '**/*.ts' 'openApiSpec/mock/status-list-mock-api-spec.yaml'",
     "lint": "./node_modules/.bin/eslint ./src/functions",
     "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",
     "infra:format": "rain fmt --write template.yaml",
@@ -17,7 +17,8 @@
     "localstack:down": "docker compose -f localstack/docker-compose.yml down",
     "localstack:up": "docker compose -f localstack/docker-compose.yml up --build -d --wait",
     "start:api": "sam local start-api --template .aws-sam/build/template.yaml --warm-containers EAGER --env-vars .env.json --port 3000",
-    "test": "./node_modules/.bin/jest --silent"
+    "test": "./node_modules/.bin/jest --silent",
+    "test:oas-drift": "openapi-diff openApiSpec/crs/crs-private-spec.yaml crs-backend/backend/openApiSpecs/crs-private-spec.yaml"
   },
   "license": "MIT",
   "devDependencies": {
@@ -30,6 +31,7 @@
     "eslint-config-prettier": "^10.1.8",
     "jest": "^30.2.0",
     "jest-junit": "^16.0.0",
+    "openapi-diff": "^0.24.1",
     "prettier": "^3.8.1",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",

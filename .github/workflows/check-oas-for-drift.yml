@@ -1,0 +1,37 @@
+name: check-oas-for-drift.yml
+on:
+  schedule:
+    # runs at 12:00 UTC every day
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-oas-for-drift:
+    name: Check Status List OAS for Drift
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout CRS
+        uses: actions/checkout@v6
+        with:
+          repository: govuk-one-login/crs-backend
+          path: crs-backend
+          ref: ${{ 'main' }}
+
+      - name: Check OAS for drift
+        uses: oasdiff/oasdiff-action/breaking@v0.0.31
+        with:
+          base: 'openApiSpec/crs/crs-private-spec.yaml'
+          revision: 'crs-backend/backend/openApiSpecs/crs-private-spec.yaml'
