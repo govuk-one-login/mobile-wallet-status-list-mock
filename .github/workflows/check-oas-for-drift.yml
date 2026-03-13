@@ -1,13 +1,10 @@
-name: check-oas-for-drift.yml
+name: Check OAS for Drift
 on:
   schedule:
     # runs at 12:00 UTC every day
     - cron: '0 12 * * *'
   workflow_dispatch:
   workflow_call:
-  push:
-    branches:
-      - DCMAW-18427-oas-drift
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,20 +15,25 @@ jobs:
     name: Check Status List OAS for Drift
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      CRS_CHECKOUT_PATH: crs-backend
+      CRS_OAS_PATH: backend/openApiSpecs/crs-private-spec.yaml
+      LOCAL_OAS_PATH: openApiSpec/crs/crs-private-spec.yaml
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Checkout CRS
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: govuk-one-login/crs-backend
-          path: crs-backend
+          path: ${{ env.CRS_CHECKOUT_PATH }}
           ref: 'main'
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
+
       - name: Install oasdiff
-        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
+        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/v1.11.11/install.sh | sh
 
       - name: Check OAS for drift
-        run: oasdiff diff crs-backend/backend/openApiSpecs/crs-private-spec.yaml openApiSpec/crs/crs-private-spec.yaml --fail-on-diff
+        run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff
