@@ -232,12 +232,6 @@ paths:
               $ref: "#/components/schemas/IssueRequest"
         required: true
       responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/IssueResponse"
         "400":
           description: Bad request - JWT validation failures and invalid requests
           content:
