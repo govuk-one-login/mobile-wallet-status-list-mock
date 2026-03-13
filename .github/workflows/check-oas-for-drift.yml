@@ -38,3 +38,8 @@ jobs:
           revision: 'openApiSpec/crs/crs-private-spec.yaml'
           fail-on-diff: true
           format: text
+
+      # This step will run if the previous one fails
+      - name: Show Diff Output
+        if: failure()
+        run: echo "${{ steps.oas_diff.outputs.msg }}"
