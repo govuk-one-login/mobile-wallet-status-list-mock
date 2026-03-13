@@ -35,17 +35,3 @@ jobs:
 
       - name: Check OAS for drift
         run: oasdiff diff crs-backend/backend/openApiSpecs/crs-private-spec.yaml openApiSpec/crs/crs-private-spec.yaml --fail-on-diff
-
-#      - name: Check OAS for drift
-#        id: oas_diff
-#        uses: oasdiff/oasdiff-action/diff@v0.0.31
-#        with:
-#          base: 'crs-backend/backend/openApiSpecs/crs-private-spec.yaml'
-#          revision: 'openApiSpec/crs/crs-private-spec.yaml'
-#          fail-on-diff: true
-#          format: text
-#
-#      # This step will run if the previous one fails
-#      - name: Show OAS drift output
-#        if: failure()
-#        run: echo "${{ steps.oas_diff.outputs.msg }}"
