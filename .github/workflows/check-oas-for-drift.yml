@@ -36,3 +36,4 @@ jobs:
         with:
           base: 'crs-backend/backend/openApiSpecs/crs-private-spec.yaml'
           revision: 'openApiSpec/crs/crs-private-spec.yaml'
+          fail-on-diff: true
