@@ -35,4 +35,4 @@ jobs:
         uses: oasdiff/oasdiff-action/breaking@v0.0.31
         with:
           base: 'openApiSpec/crs/crs-private-spec.yaml'
-          revision: 'crs-backend/backend/openApiSpecs/crs-private-spec.yaml'
+          revision: 'crs-backend/backend/openApiSpecs/crs-private-spec1.yaml'
