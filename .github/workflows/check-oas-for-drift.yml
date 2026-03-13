@@ -32,6 +32,7 @@ jobs:
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
       - name: Check OAS for drift
+        id: oas_diff
         uses: oasdiff/oasdiff-action/diff@v0.0.31
         with:
           base: 'crs-backend/backend/openApiSpecs/crs-private-spec.yaml'
@@ -40,6 +41,6 @@ jobs:
           format: text
 
       # This step will run if the previous one fails
-      - name: Show Diff Output
+      - name: Show OAS drift output
         if: failure()
         run: echo "${{ steps.oas_diff.outputs.msg }}"
