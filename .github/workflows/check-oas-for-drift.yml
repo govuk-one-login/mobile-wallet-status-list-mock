@@ -28,7 +28,8 @@ jobs:
         with:
           repository: govuk-one-login/crs-backend
           path: crs-backend
-          ref: ${{ 'main' }}
+          ref: 'main'
+          token: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
       - name: Check OAS for drift
         uses: oasdiff/oasdiff-action/breaking@v0.0.31
