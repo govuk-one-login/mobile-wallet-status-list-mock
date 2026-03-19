@@ -19,6 +19,7 @@
     "start:api": "sam local start-api --template .aws-sam/build/template.yaml --warm-containers EAGER --env-vars .env.json --port 3000",
     "test": "./node_modules/.bin/jest --silent",
     "test:prism:local": "./node_modules/.bin/jest --config jest.prism.local.config.ts --silent",
+    "test:prism:ci": "./node_modules/.bin/jest --config jest.prism.ci.config.ts --silent",
     "prism-proxy": "prism proxy ./api-spec.yaml http://localhost:3000 --errors"
   },
   "license": "MIT",

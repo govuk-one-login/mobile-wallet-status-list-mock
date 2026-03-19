@@ -1,0 +1,47 @@
+name: Conformance
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment to run conformance tests against
+        required: true
+        default: build
+        type: choice
+        options:
+          - integration
+          - build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.environment }}
+  cancel-in-progress: true
+
+jobs:
+  prism-conformance:
+    name: Prism Conformance Tests (${{ inputs.environment }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      UPSTREAM_URL: ${{ inputs.environment == 'build' && 'https://status-list-mock.mobile.build.account.gov.uk' || 'https://status-list-mock.mobile.integration.account.gov.uk' }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prism conformance tests
+        run: npm run test:prism:ci
+
+      - name: Stop Prism
+        if: always()
+        run: pkill -f "prism proxy" || true
