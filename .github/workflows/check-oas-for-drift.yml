@@ -46,7 +46,7 @@ jobs:
         run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/v1.11.11/install.sh | sh
 
       - name: Check OAS for drift
-        run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff --exclude-elements
+        run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff --exclude-elements extensions
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
