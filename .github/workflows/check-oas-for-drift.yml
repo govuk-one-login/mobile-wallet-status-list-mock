@@ -60,14 +60,16 @@ jobs:
           webhook: ${{ secrets.OAS_DRIFT_BOT_SLACK_WEBHOOK_URL }} # add in repo
           webhook-type: incoming-webhook
           payload: |
-            {
-              "text": ":x: *${{ github.workflow }}* failed on `${{ github.ref_name }}`",
-              "attachments": [{
-                "color": "danger",
-                "fields": [
-                  { "title": "Repository", "value": "${{ github.repository }}", "short": true },
-                  { "title": "Run", "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>", "short": true }
-                ]
-              }]
-            }
+            "repository": "${{ github.repository }}"
+            "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#            {
+#              "text": ":x: *${{ github.workflow }}* failed on `${{ github.ref_name }}`",
+#              "attachments": [{
+#                "color": "danger",
+#                "fields": [
+#                  { "title": "Repository", "value": "${{ github.repository }}", "short": true },
+#                  { "title": "Run", "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>", "short": true }
+#                ]
+#              }]
+#            }
 # tests
