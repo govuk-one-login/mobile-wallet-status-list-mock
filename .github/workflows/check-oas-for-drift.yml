@@ -42,11 +42,20 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
+      - name: Copy CRS OAS to local path
+        # oasdiff embeds the source file path as __origin__ metadata in parsed extensions.
+        # Diffing files at different paths causes false positives in x-amazon-apigateway-integration
+        # fields where the only "change" is the file path in that metadata. Copying the CRS spec
+        # to the same directory as the local spec ensures both files share the same origin path.
+        run: cp ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} openApiSpec/crs/crs-private-spec-upstream.yaml
+
+
       - name: Install oasdiff
-        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
+        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/v1.11.11/install.sh | sh
 
       - name: Check OAS for drift
-        run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff
+        run: oasdiff diff openApiSpec/crs/crs-private-spec-upstream.yaml ${{ env.LOCAL_OAS_PATH }} --fail-on-diff
+#        run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
