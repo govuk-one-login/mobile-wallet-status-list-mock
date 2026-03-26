@@ -57,19 +57,8 @@ jobs:
       - name: Send Slack alert
         uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         with:
-          webhook: ${{ secrets.OAS_DRIFT_BOT_SLACK_WEBHOOK_URL }} # add in repo
+          webhook: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
             "repository": "${{ github.repository }}"
             "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-#            {
-#              "text": ":x: *${{ github.workflow }}* failed on `${{ github.ref_name }}`",
-#              "attachments": [{
-#                "color": "danger",
-#                "fields": [
-#                  { "title": "Repository", "value": "${{ github.repository }}", "short": true },
-#                  { "title": "Run", "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>", "short": true }
-#                ]
-#              }]
-#            }
-# tests moer
