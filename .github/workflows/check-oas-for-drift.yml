@@ -43,7 +43,7 @@ jobs:
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
       - name: Install oasdiff
-        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/v1.11.11/install.sh | sh
+        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
 
       - name: Check OAS for drift
         run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff
