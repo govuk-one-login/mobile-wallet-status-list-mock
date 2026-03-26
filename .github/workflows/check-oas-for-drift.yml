@@ -31,16 +31,16 @@ jobs:
           app-id: ${{ secrets.CHECKOUT_PRIVATE_REPO_GITHUB_APP_ID }}
           private-key: ${{ secrets.CHECKOUT_PRIVATE_REPO_GITHUB_APP_KEY }}
           owner: govuk-one-login
-      - name: Check out repository code
+      - name: Check out Mock Status List repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Checkout CRS
+      - name: Checkout CRS repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          repository: govuk-one-login/wallet-onboarding-test-private-repo
+          repository: govuk-one-login/crs-backend
           path: ${{ env.CRS_CHECKOUT_PATH }}
           ref: 'main'
-          token: ${{ steps.generate-token.outputs.token }}
+          ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
       - name: Install oasdiff
         run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/v1.11.11/install.sh | sh
@@ -62,4 +62,3 @@ jobs:
           payload: |
             "repository": "${{ github.repository }}"
             "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-#            tests more
