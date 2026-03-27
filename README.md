@@ -11,6 +11,21 @@ This project uses AWS SAM to define and deploy the following AWS resources:
 - Amazon S3 buckets: Store status lists and JWKS
 - AWS KMS key (asymmetric): Used for cryptographically signing status list tokens
 
+## OpenAPI Specifications
+
+This repo contains two OpenAPI specs under `openApiSpec/`:
+
+- `openApiSpec/mock/api-spec.yaml` — the spec for this mock service
+- `openApiSpec/crs/crs-private-spec.yaml` — a copy of the private CRS backend API spec
+
+### Why is the CRS spec in this repo?
+
+This mock implements the same API contract as the real CRS service. To ensure the mock does not drift from the real service, a copy of the CRS private spec is kept here and checked for drift against the upstream source daily and on every PR.
+
+### OAS Drift Detection
+
+The `check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff) to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating `openApiSpec/crs/crs-private-spec.yaml` to reflect the upstream changes.
+
 ## Pre-requisites
 
 - [Node.js](https://nodejs.org/en) version 22 or higher (use the provided `.nvmrc` file with [nvm](https://github.com/nvm-sh/nvm) for easy version management)
@@ -75,3 +90,24 @@ aws --endpoint-url=http://localhost:4562 s3 cp s3://jwks/.well-known/jwks.json -
 aws --endpoint-url=http://localhost:4562 s3 cp s3://status-list/t/{id} -
 
 Replace `{id}` with the actual token ID (e.g., `81d8809a-79c3-45b3-9fa1-4108c49f240c`).
+```
+
+## OpenAPI Specifications
+
+This repo contains two OpenAPI specs under `openApiSpec/`:
+
+- `openApiSpec/mock/api-spec.yaml` — the spec for this mock service
+- `openApiSpec/crs/crs-private-spec.yaml` — a copy of the private CRS backend API spec
+
+### Why is the CRS spec in this repo?
+
+This mock implements the same API contract as the real CRS service. To ensure the mock does not drift from the real 
+service, a copy of the CRS private spec is kept here and checked for drift against the upstream source daily 
+and on every PR.
+
+### OAS Drift Detection
+
+The `check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff) 
+to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a 
+notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating 
+`openApiSpec/crs/crs-private-spec.yaml` to reflect the upstream changes.
