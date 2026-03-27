@@ -5,6 +5,11 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
   workflow_call:
+    secrets:
+      WALLET_CRS_DEPLOY_KEY:
+        required: true
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL:
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
