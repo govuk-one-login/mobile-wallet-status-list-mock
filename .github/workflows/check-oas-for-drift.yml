@@ -39,16 +39,24 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
-      - name: Install oasdiff
-        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/v1.11.11/install.sh | sh
-
       - name: Check OAS for drift
-        # --exclude-elements extensions is used to ignore all x- prefixed extension fields.
-        # oasdiff embeds the source filename & path as __origin__ metadata in parsed extensions which
-        # causes false positives when diffing files with different names/paths. Additionally,
-        # x-amazon-apigateway-integration contains AWS infrastructure config (Lambda ARNs,
-        # passthrough behaviour) that is intentionally different between the two repos.
-        run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff --exclude-elements extensions
+        uses: oasdiff/oasdiff-action/diff@b7b6e3e3e7ab6a0e7c5e5e5e5e5e5e5e5e5e5e5 # v1.0.8
+        with:
+          base: ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }}
+          revision: ${{ env.LOCAL_OAS_PATH }}
+          fail-on-diff: true
+          exclude-elements: extensions
+
+#      - name: Install oasdiff
+#        run: curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/v1.11.11/install.sh | sh
+
+#      - name: Check OAS for drift
+#        # --exclude-elements extensions is used to ignore all x- prefixed extension fields.
+#        # oasdiff embeds the source filename & path as __origin__ metadata in parsed extensions which
+#        # causes false positives when diffing files with different names/paths. Additionally,
+#        # x-amazon-apigateway-integration contains AWS infrastructure config (Lambda ARNs,
+#        # passthrough behaviour) that is intentionally different between the two repos.
+#        run: oasdiff diff ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }} ${{ env.LOCAL_OAS_PATH }} --fail-on-diff --exclude-elements extensions
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
