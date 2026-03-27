@@ -40,7 +40,7 @@ jobs:
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
       - name: Check OAS for drift
-        uses: oasdiff/oasdiff-action/diff@b7b6e3e3e7ab6a0e7c5e5e5e5e5e5e5e5e5e5e5 # v1.0.8
+        uses: oasdiff/oasdiff-action/diff@1f38ea5 # v1.0.8
         with:
           base: ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }}
           revision: ${{ env.LOCAL_OAS_PATH }}
