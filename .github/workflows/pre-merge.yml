@@ -73,4 +73,3 @@ jobs:
   check-oas-for-drift:
     name: Check Status List OAS for drift
     uses: ./.github/workflows/check-oas-for-drift.yml
-    secrets: inherit
