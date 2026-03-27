@@ -70,6 +70,7 @@ jobs:
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
 
-      - check-oas-for-drift:
-        name: Check Status List OAS for drift
-        uses: ./.github/workflows/check-oas-for-drift.yml
+  check-oas-for-drift:
+    name: Check Status List OAS for drift
+    uses: ./.github/workflows/check-oas-for-drift.yml
+    secrets: inherit
