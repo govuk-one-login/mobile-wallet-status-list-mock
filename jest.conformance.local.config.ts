@@ -15,5 +15,6 @@ export default {
   testMatch: ["**/test/conformance/**/*.prism.local.test.ts"], // only matches local conformance tests, not unit tests
   testEnvironment: "node",
   testTimeout: 60000, // 60s to accommodate Lambda cold start
+  maxWorkers: 1, // suites share port 4010 — run serially to avoid conflicts
   clearMocks: true,
 };
