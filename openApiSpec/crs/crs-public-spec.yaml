@@ -82,7 +82,9 @@ paths:
 components:
   schemas:
     TokenStatusListResponse:
-      type: string
+      # Changed from `type: string` to `type: object` — OAS 3.0 does not support
+      # `properties` on a `type: string` schema.
+      type: object
       description: JOSE signed IETF Token Status List JWT containing the status list.
       example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6ImU5YjE1OGI5Y2E2OWJlNDA2ODVjNjUyNTVkN2M3ODE2In0.eyJleHAiOjE3NTk5MTg3NTQsImlhdCI6MTc1OTMxMzk1NCwiaXNzIjoiaHR0cHM6Ly9jcnMuYWNjb3VudC5nb3YudWsvIiwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemRBRUFBTWdBaGcifSwic3ViIjoiaHR0cHM6Ly9jcnMuYWNjb3VudC5nb3YudWsvdC8zQjBGM0JEMDg3QTciLCJ0dGwiOjM2MDB9.mESUJzZ07hCCdAzHXJZaxkKNdvYBJPwRLvqyP185t72hJUBMdFvVI-ynQjl7KRmcidxBXuI_gCHppAqctk1rAQ"
       properties:
@@ -106,7 +108,8 @@ components:
             expiry date timestamp (as defined in rfc7519) of the status list JWT.
             The information in the JWT past date may be invalid and it must not be used beyond this date.
             A stale status list may only be used in scenarios where there is an outage and the status list service is unable to serve a fresh status list.
-          example: "https://crs.account.gov.uk/"
+          # Fixed: was incorrectly set to a URL string. exp is a unix timestamp number.
+          example: 1759918754
         iss:
           type: string
           description: url of the issuer of the status list.
@@ -122,17 +125,19 @@ components:
         ttl:
           type: number
           description: time duration in seconds for how long the status list can be cached.
-          example: "https://crs.account.gov.uk/b/A671FED3E9AD"
+          # Fixed: was incorrectly set to a URL string. ttl is a duration in seconds.
+          example: 3600
         status_list:
           type: object
           description: |
             The status list JWT containing the status information of the Referenced Token.
             The status of each Referenced Token is identified using an index that maps to two bits within the byte array.
             The byte array is compressed using DEFLATE [RFC1951] with the ZLIB [RFC1950] data format and base64url-encoded.
+          # Fixed: example was wrapped in a spurious "status_list" key and had
+          # trailing commas (invalid YAML). Example now shows the object value directly.
           example:
-            status_list":
-              bits: 2,
-              lst: "eNpzdAEAAMgAhg"
+            bits: 2
+            lst: "eNpzdAEAAMgAhg"
           properties:
             bits:
               type: number
@@ -156,11 +161,12 @@ components:
         - sub
         - ttl
         - status_list
-      xml:
-        name: issuerequest
+      # Removed: `xml: name: issuerequest` — not relevant for a JSON/JWT API.
 
     BitstringStatusListResponse:
-      type: string
+      # Changed from `type: string` to `type: object` — same reason as
+      # TokenStatusListResponse above. Properties document decoded JWT claims.
+      type: object
       description: JOSE signed Bitstring status list credential containing the status list.
       properties:
         alg:
