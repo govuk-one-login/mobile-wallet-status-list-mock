@@ -12,10 +12,6 @@ on:
           - integration
           - build
 
-env:
-  INTEGRATION_URL: https://status-list-mock.mobile.integration.account.gov.uk
-  BUILD_URL: https://status-list-mock.mobile.build.account.gov.uk
-
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.environment }}
   cancel-in-progress: true
@@ -28,7 +24,7 @@ jobs:
     permissions:
       contents: read
     env:
-      UPSTREAM_URL: ${{ inputs.environment == 'build' && env.BUILD_URL || env.INTEGRATION_URL }}
+      UPSTREAM_URL: ${{ inputs.environment == 'build' && 'https://status-list-mock.mobile.build.account.gov.uk' || 'https://status-list-mock.mobile.integration.account.gov.uk' }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
