@@ -90,7 +90,7 @@ This mock implements the same API contract as the real CRS service. To ensure th
 service, a copy of the CRS private spec is kept here and checked for drift against the upstream source daily 
 and on every PR.
 
-### OAS Drift Detection
+### Open API Specification (OAS) Drift Detection
 
 The `check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdiff](https://github.com/oasdiff/oasdiff) 
 to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a 
