@@ -82,86 +82,24 @@ paths:
 components:
   schemas:
     TokenStatusListResponse:
-      # Changed from `type: string` to `type: object` — OAS 3.0 does not support
-      # `properties` on a `type: string` schema.
-      type: object
-      description: JOSE signed IETF Token Status List JWT containing the status list.
+      # Removed properties and added description
+      type: string
+      description: |
+        JOSE signed IETF Token Status List JWT containing the status list.
+        Header claims:
+          - alg: (string) Algorithm used for signing the JWT ("ES256")
+          - typ: (string) Type of the token ("statuslist+jwt")
+          - kid: (string) Key ID used to identify the signing key in the status list JWKS endpoint
+
+        Payload claims:
+          - iss: (string) URL of the issuer of the status list
+          - iat: (number, unix timestamp) Issued At date — as defined in rfc7519
+          - exp: (number, unix timestamp) Expiry date — as defined in rfc7519
+          - sub: (string) The URI of this status list that holds the status indexes
+          - ttl: (number) Time duration in seconds for how long the status list can be cached
+          - status_list.bits: (number) Number of bits per token in the status list (2)
+          - status_list.lst: (string) Base64url-encoded DEFLATE-compressed status byte array
       example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6ImU5YjE1OGI5Y2E2OWJlNDA2ODVjNjUyNTVkN2M3ODE2In0.eyJleHAiOjE3NTk5MTg3NTQsImlhdCI6MTc1OTMxMzk1NCwiaXNzIjoiaHR0cHM6Ly9jcnMuYWNjb3VudC5nb3YudWsvIiwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemRBRUFBTWdBaGcifSwic3ViIjoiaHR0cHM6Ly9jcnMuYWNjb3VudC5nb3YudWsvdC8zQjBGM0JEMDg3QTciLCJ0dGwiOjM2MDB9.mESUJzZ07hCCdAzHXJZaxkKNdvYBJPwRLvqyP185t72hJUBMdFvVI-ynQjl7KRmcidxBXuI_gCHppAqctk1rAQ"
-      properties:
-        alg:
-          type: string
-          description: Algorithm used for signing the JWT (ES256) - Stored in JWT Header
-          example: "ES256"
-        typ:
-          type: string
-          description: Type of the token, should be "JWT" - Stored in JWT Header
-          example: "JWT"
-        kid:
-          type: string
-          description: |
-            Key ID used to identify the signing key in the status list JWKS endpoint.
-            The public key can be used to verify the signature of the JWT.
-          example: "ab2f3738-03ec-4312-a65e-7f0461a34e7b"
-        exp:
-          type: number
-          description: |
-            expiry date timestamp (as defined in rfc7519) of the status list JWT.
-            The information in the JWT past date may be invalid and it must not be used beyond this date.
-            A stale status list may only be used in scenarios where there is an outage and the status list service is unable to serve a fresh status list.
-          # Fixed: was incorrectly set to a URL string. exp is a unix timestamp number.
-          example: 1759918754
-        iss:
-          type: string
-          description: url of the issuer of the status list.
-          example: "https://crs.account.gov.uk/"
-        iat:
-          type: number
-          description: (unix timestamp) Issued At date - As defined in rfc7519
-          example: 1758038912
-        sub:
-          type: string
-          description: The URI of this status list that holds the status indexes.
-          example: "https://crs.account.gov.uk/"
-        ttl:
-          type: number
-          description: time duration in seconds for how long the status list can be cached.
-          # Fixed: was incorrectly set to a URL string. ttl is a duration in seconds.
-          example: 3600
-        status_list:
-          type: object
-          description: |
-            The status list JWT containing the status information of the Referenced Token.
-            The status of each Referenced Token is identified using an index that maps to two bits within the byte array.
-            The byte array is compressed using DEFLATE [RFC1951] with the ZLIB [RFC1950] data format and base64url-encoded.
-          # Fixed: example was wrapped in a spurious "status_list" key and had
-          # trailing commas (invalid YAML). Example now shows the object value directly.
-          example:
-            bits: 2
-            lst: "eNpzdAEAAMgAhg"
-          properties:
-            bits:
-              type: number
-              minimum: 2
-              maximum: 2
-              description: |
-                Number of bits used to represent the status at a particular index. Only 2 bit status indexes are supported.
-            lst:
-              type: string
-              description: |
-                A compressed byte array containing the status information of the Referenced Token.
-                The status of each Referenced Token is identified using an index that maps to two bits within the byte array.
-                The byte array is compressed using DEFLATE [RFC1951] with the ZLIB [RFC1950] data format and base64url-encoded.
-      required:
-        - alg
-        - typ
-        - kid
-        - exp
-        - iss
-        - iat
-        - sub
-        - ttl
-        - status_list
-      # Removed: `xml: name: issuerequest` — not relevant for a JSON/JWT API.
 
     BitstringStatusListResponse:
       # Changed from `type: string` to `type: object` — same reason as

@@ -128,7 +128,7 @@ paths:
               schema:
                 type: string
           content:
-            application/json:
+            application/statuslist+jwt:
               schema:
                 type: string
                 example: "eyJ.."
@@ -162,7 +162,7 @@ paths:
             statusCode: "200"
             description: OK
             responseParameters:
-              method.response.header.Content-Type: "'application/json'"
+              method.response.header.Content-Type: "'application/statuslist+jwt'"
               method.response.header.Cache-Control: "'max-age=3600'"
             contentHandling: "CONVERT_TO_TEXT"
           default:
