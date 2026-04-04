@@ -54,8 +54,7 @@ jobs:
     name: Notify Slack on Failure
     runs-on: ubuntu-24.04
     needs: [ check-oas-for-drift ]
-    permissions:
-      contents: read
+    permissions: {}
     if: failure()
     steps:
       - name: Send Slack alert
