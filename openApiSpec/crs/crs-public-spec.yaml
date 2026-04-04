@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: GOV.UK One Login Status List - Public API
+  version: 1.0.0
+  description: Public endpoints for retrieving status lists
+
+paths:
+  /t/{statusListIdentifier}:
+    get:
+      description: A public endpoint that returns an IETF Token Status List JWT. The list that is returned depends on the list type for the GOV.UK Wallet credential issuer agreed at the time of registration. The response has a signed JWT in one of the two supported status list formats.
+      parameters:
+        - in: path
+          name: statusListIdentifier
+          schema:
+            type: string
+            example: "A671FED3E9AD"
+          required: true
+          description: "Unique name representing the specific status list"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/statuslist+jwt:
+              schema:
+                $ref: '#/components/schemas/TokenStatusListResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusList404ErrorResponse"
+              example:
+                error: NOT_FOUND
+                error_description: "Status List not found for endpoint uri"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusList500ErrorResponse"
+              example:
+                error: INTERNAL_SERVER_ERROR
+                error_description: "..."
+
+components:
+  schemas:
+    TokenStatusListResponse:
+      # Removed properties and added description
+      type: string
+      description: |
+        JOSE signed IETF Token Status List JWT containing the status list.
+        Header claims:
+          - alg: (string) Algorithm used for signing the JWT ("ES256")
+          - typ: (string) Type of the token ("statuslist+jwt")
+          - kid: (string) Key ID used to identify the signing key in the status list JWKS endpoint
+
+        Payload claims:
+          - iss: (string) URL of the issuer of the status list
+          - iat: (number, unix timestamp) Issued At date — as defined in rfc7519
+          - exp: (number, unix timestamp) Expiry date — as defined in rfc7519
+          - sub: (string) The URI of this status list that holds the status indexes
+          - ttl: (number) Time duration in seconds for how long the status list can be cached
+          - status_list.bits: (number) Number of bits per token in the status list (2)
+          - status_list.lst: (string) Base64url-encoded DEFLATE-compressed status byte array
+      example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6ImU5YjE1OGI5Y2E2OWJlNDA2ODVjNjUyNTVkN2M3ODE2In0.eyJleHAiOjE3NTk5MTg3NTQsImlhdCI6MTc1OTMxMzk1NCwiaXNzIjoiaHR0cHM6Ly9jcnMuYWNjb3VudC5nb3YudWsvIiwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5wemRBRUFBTWdBaGcifSwic3ViIjoiaHR0cHM6Ly9jcnMuYWNjb3VudC5nb3YudWsvdC8zQjBGM0JEMDg3QTciLCJ0dGwiOjM2MDB9.mESUJzZ07hCCdAzHXJZaxkKNdvYBJPwRLvqyP185t72hJUBMdFvVI-ynQjl7KRmcidxBXuI_gCHppAqctk1rAQ"
+
+    StatusList404ErrorResponse:
+      type: object
+      properties:
+        error:
+          description: An error code - must be `NOT_FOUND`.
+          type: string
+        error_description:
+          description: A human-readable explanation of the error.
+          type: string
+      required:
+        - error
+
+    StatusList500ErrorResponse:
+      type: object
+      properties:
+        error:
+          description: An error code - must be `INTERNAL_SERVER_ERROR`.
+          type: string
+        error_description:
+          description: A human-readable explanation of the error.
+          type: string
+      required:
+        - error
