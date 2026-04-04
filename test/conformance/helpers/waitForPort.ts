@@ -1,4 +1,4 @@
-import net from "net";
+import net from "node:net";
 
 // Polls a TCP port until it accepts connections or the timeout is reached.
 // Used to wait for Prism Proxy and SAM local to be ready before tests run.

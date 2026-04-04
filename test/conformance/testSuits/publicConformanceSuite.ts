@@ -1,5 +1,5 @@
-import { ChildProcess, spawn } from "child_process";
-import path from "path";
+import { ChildProcess, spawn } from "node:child_process";
+import path from "node:path";
 import { waitForPort } from "../helpers/waitForPort";
 
 const PRISM_PORT = 4011; // port 4010 is used by the private spec suites
