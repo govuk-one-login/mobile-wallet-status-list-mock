@@ -39,16 +39,12 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
 
-      # exclude-elements: extensions is used to ignore all x- prefixed extension fields.
-      # oasdiff embeds the source filename & path as __origin__ metadata in parsed extensions which
-      # causes false positives when diffing files with different names/paths.
       - name: Check OAS for drift
         uses: oasdiff/oasdiff-action/diff@1f38ea5ea0b4a2e4e49901c3bcdf4386a05e9ea1 # v0.0.37
         with:
           base: ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }}
           revision: ${{ env.LOCAL_OAS_PATH }}
           fail-on-diff: true
-#          exclude-elements: extensions
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
