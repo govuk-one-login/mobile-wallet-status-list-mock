@@ -1,7 +1,8 @@
 import { publicConformanceSuite } from "../../testSuits/publicConformanceSuite";
 
 const UPSTREAM_URL = process.env.UPSTREAM_URL;
-if (!UPSTREAM_URL) throw new Error("UPSTREAM_URL environment variable is not set.");
+if (!UPSTREAM_URL)
+  throw new Error("UPSTREAM_URL environment variable is not set.");
 
 publicConformanceSuite({
   upstream: UPSTREAM_URL,

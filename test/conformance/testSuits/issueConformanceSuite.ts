@@ -18,7 +18,10 @@ export interface SuiteConfig {
   setup: () => Promise<void>;
 }
 
-async function postToIssue(body: string, contentType: string): Promise<Response> {
+async function postToIssue(
+  body: string,
+  contentType: string,
+): Promise<Response> {
   return fetch(`${PRISM_BASE_URL}/issue`, {
     method: "POST",
     headers: { "Content-Type": contentType },

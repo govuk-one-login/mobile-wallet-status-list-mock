@@ -1,9 +1,6 @@
 name: OAS Conformance Tests
 
 on:
-  push:
-    branches:
-      - DCMAW-19303
   workflow_dispatch:
     inputs:
       environment:

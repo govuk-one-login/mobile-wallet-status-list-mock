@@ -24,7 +24,10 @@ export interface SuiteConfig {
   setup: () => Promise<void>;
 }
 
-async function postToRevoke(body: string, contentType: string): Promise<Response> {
+async function postToRevoke(
+  body: string,
+  contentType: string,
+): Promise<Response> {
   return fetch(`${PRISM_BASE_URL}/revoke`, {
     method: "POST",
     headers: { "Content-Type": contentType },

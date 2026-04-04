@@ -1,7 +1,8 @@
 import { revokeConformanceSuite } from "../../testSuits/revokeConformanceSuite";
 
 const UPSTREAM_URL = process.env.UPSTREAM_URL;
-if (!UPSTREAM_URL) throw new Error("UPSTREAM_URL environment variable is not set.");
+if (!UPSTREAM_URL)
+  throw new Error("UPSTREAM_URL environment variable is not set.");
 
 revokeConformanceSuite({
   upstream: UPSTREAM_URL,
