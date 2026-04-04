@@ -20,11 +20,11 @@ export interface SuiteConfig {
 
 async function postToIssue(
   body: string,
-  contentType: string,
+  contentType?: string,
 ): Promise<Response> {
   return fetch(`${PRISM_BASE_URL}/issue`, {
     method: "POST",
-    headers: { "Content-Type": contentType },
+    headers: contentType ? { "Content-Type": contentType } : {},
     body,
   });
 }
@@ -60,6 +60,11 @@ export function issueConformanceSuite(config: SuiteConfig): void {
       it("proxies a request with Content-Type: application/jwt", async () => {
         const res = await postToIssue("a.valid.jwt", "application/jwt");
         expect(res.status).toBe(200);
+      });
+
+      it("rejects a request with no Content-Type with 422", async () => {
+        const res = await postToIssue("a.valid.jwt");
+        expect(res.status).toBe(422);
       });
 
       it("rejects Content-Type: application/json with 422", async () => {
