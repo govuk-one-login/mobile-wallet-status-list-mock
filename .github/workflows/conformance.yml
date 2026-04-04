@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: read
     env:
-#      TODO: Using dev URLs for testing
+#      TODO: Update URLs, using dev URLs for testing
       UPSTREAM_URL: ${{ inputs.environment == 'build' && 'https://status-list-mock.wallet-onboarding.dev.account.gov.uk' || 'https://status-list-mock.wallet-onboarding.dev.account.gov.uk' }}
     steps:
       - name: Check out repository code
