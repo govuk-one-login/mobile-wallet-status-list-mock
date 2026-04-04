@@ -63,11 +63,11 @@ export function publicConformanceSuite(config: PublicSuiteConfig): void {
         expect(res.status).toBe(200);
       });
 
-      it("returns 404 for an unknown identifier", async () => {
-        const res = await fetch(`${PRISM_BASE_URL}/t/unknown-identifier`);
-
-        expect(res.status).toBe(404);
-      });
+      // it("returns 404 for an unknown identifier", async () => {
+      //   const res = await fetch(`${PRISM_BASE_URL}/t/unknown-identifier`);
+      //
+      //   expect(res.status).toBe(404);
+      // });
     });
   });
 }

@@ -31,7 +31,7 @@ publicConformanceSuite({
 
     const { uri } = await res.json();
 
-    // uri is e.g. "https://status-list-mock.mobile.build.account.gov.uk/t/uuid"
+    // uri is e.g. "https://status-list-mock.wallet-onboarding.build.account.gov.uk/t/uuid"
     // The status list identifier is the final path segment after /t/
     const identifier = new URL(uri).pathname.split("/").pop();
     if (!identifier) {
