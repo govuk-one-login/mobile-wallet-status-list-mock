@@ -1,0 +1,63 @@
+name: Check OAS for Drift
+on:
+  schedule:
+    # runs at midnight every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      WALLET_CRS_DEPLOY_KEY:
+        required: true
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL:
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-oas-for-drift:
+    name: Check Status List OAS for Drift
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      CRS_CHECKOUT_PATH: crs-backend
+      CRS_OAS_PATH: backend/openApiSpecs/crs-private-spec.yaml
+      LOCAL_OAS_PATH: openApiSpec/crs/crs-private-spec.yaml
+
+    steps:
+      - name: Check out Mock Status List repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout CRS repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: govuk-one-login/crs-backend
+          path: ${{ env.CRS_CHECKOUT_PATH }}
+          ref: 'main'
+          ssh-key: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
+
+      - name: Check OAS for drift
+        uses: oasdiff/oasdiff-action/diff@1f38ea5ea0b4a2e4e49901c3bcdf4386a05e9ea1 # v0.0.37
+        with:
+          base: ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }}
+          revision: ${{ env.LOCAL_OAS_PATH }}
+          fail-on-diff: true
+
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    runs-on: ubuntu-24.04
+    needs: [ check-oas-for-drift ]
+    permissions: {}
+    if: failure()
+    steps:
+      - name: Send Slack alert
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
+        with:
+          webhook: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            "repository": "${{ github.repository }}"
+            "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

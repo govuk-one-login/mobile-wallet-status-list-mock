@@ -1,0 +1,534 @@
+openapi: 3.0.0
+info:
+  title: GOV.UK One Login Status List - API for Credential Issuance and Revocation
+  version: 1.0.0
+  description: GOV.UK One Login Status List - API for asynchronous issuing of credential indices
+tags:
+  - name: issue
+    description: Endpoint to issue credentials
+  - name: revoke
+    description: Endpoint to revoke credentials
+
+components:
+  schemas:
+    IssueRequest:
+      type: string
+      description: |
+        JOSE signed JWT containing issuer information and status expiry.
+
+        Required header claims:
+          - alg: (string) Algorithm used for signing the JWT (ES256)
+          - typ: (string) Type of the token, should be "JWT"
+          - kid: (string) Key ID used to identify the signing key in the credential issuers JWKS endpoint. This will be used to verify the signature of the JWT.
+
+        Required payload claims:
+          - iss: (string) Issuer: must match a known clientId - As defined in RFC7519
+          - iat: (number) (unix timestamp) Issued At date - As defined in RFC7519
+          - jti: (string) JWT ID: A unique case sensitive string used as a identifier for the JWT, used to prevent replay attacks. Its value must be a lowercase UUID.
+          - statusExpiry: (number) (unix timestamp) A timestamp representing when the moment the issued credential expires. It should not be longer than 1 year from the iat claim
+
+        Example Header and Payload:
+        {
+            "alg": "ES256",
+            "typ": "JWT",
+            "kid": "ab2f3738-03ec-4312-a65e-7f0461a34e7b"
+        },
+        {
+          "iss": "clientId-abcdef",
+          "iat": 1758038912,
+          "jti": "bcea4e51-6eca-4547-8d18-4b971b72c146",
+          "statusExpiry": 1789574909
+        }
+      properties:
+        alg:
+          type: string
+          description: |
+            Algorithm used for signing the JWT (ES256) - Stored in JWT Header
+          example: "ES256"
+        typ:
+          type: string
+          description: |
+            Type of the token, should be "JWT" - Stored in JWT Header
+          example: "JWT"
+        kid:
+          type: string
+          description: |
+            Key ID used to identify the signing key in the credential issuers JWKS endpoint. This will be used to verify the signature of the JWT. - Stored in JWT Header
+          example: "ab2f3738-03ec-4312-a65e-7f0461a34e7b"
+        iss:
+          type: string
+          description: |
+            Issuer: must match a known clientId - As defined in rfc7519
+          example: "clientId-abcdef"
+        iat:
+          type: number
+          description: |
+            (unix timestamp) Issued At date - As defined in rfc7519
+          example: 1758038912
+        statusExpiry:
+          type: number
+          description: |
+            (unix timestamp) A timestamp representing when the moment the issued credential expires. It should not be longer than 1 year from the iat claim
+          example: 1789574909
+        jti:
+          type: string
+          description: |
+            JWT ID: A unique case sensitive string used as a identifier for the JWT, used to prevent replay attacks. Its value must be a lowercase UUID.
+          example: "bcea4e51-6eca-4547-8d18-4b971b72c146"
+      required:
+        - alg
+        - typ
+        - kid
+        - iss
+        - iat
+        - jti
+        - statusExpiry
+      example: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+    IssueResponse:
+      type: object
+      properties:
+        idx:
+          type: number
+          minimum: 0
+          example: 3
+          description: The assigned Status List index. This index position is unique within the Status List identified by the URI
+        uri:
+          type: string
+          example: "https://crs.account.gov.uk/b/A671FED3E9AD"
+          description: The URI of the Status List that holds the issued credential. It is used in combination with the index to retrieve the Status List entry
+      required:
+        - idx
+        - uri
+    RevokeRequest:
+      type: string
+      description: |
+        JOSE signed JWT containing the index and URI to revoke.
+
+        Required header claims:
+          - alg: (string) Algorithm used for signing the JWT (ES256)
+          - typ: (string) Type of the token, should be "JWT"
+          - kid: (string) Key ID used to identify the signing key in the credential issuers JWKS endpoint. This will be used to verify the signature of the JWT.
+
+        Required payload claims:
+          - iss: (string) Issuer: must match a known clientId - As defined in RFC7519
+          - iat: (number) (unix timestamp) Issued At date - As defined in RFC7519
+          - idx: (number) The index to revoke
+          - uri: (string) The URI of the Status List that holds the issued credential. The uri + idx combination is used to uniquely identify the entry to revoke
+          - jti: (string) JWT ID: A unique case sensitive string used as a identifier for the JWT, used to prevent replay attacks. Its value must be a lowercase UUID.
+
+        Example Header and Payload:
+        {
+            "alg": "ES256",
+            "typ": "JWT",
+            "kid": "ab2f3738-03ec-4312-a65e-7f0461a34e7b"
+        },
+        {
+          "iss": "clientId-abcdef",
+          "iat": 1758038912,
+          "idx": 3,
+          "jti": "db290616-1f3c-4ff9-939f-2749abdbacec",
+          "uri": "https://crs.account.gov.uk/b/A671FED3E9AD"
+        }
+      properties:
+        alg:
+          type: string
+          description: |
+            Algorithm used for signing the JWT (ES256) - Stored in JWT Header
+          example: "ES256"
+        typ:
+          type: string
+          description: |
+            Type of the token, should be "JWT" - Stored in JWT Header
+          example: "JWT"
+        kid:
+          type: string
+          description: |
+            Key ID used to identify the signing key in the credential issuers JWKS endpoint. This will be used to verify the signature of the JWT - Stored in JWT Header
+          example: "ab2f3738-03ec-4312-a65e-7f0461a34e7b"
+        iss:
+          type: string
+          description: |
+            Issuer: must match a known clientId - As defined in rfc7519
+          example: "clientId-abcdef"
+        iat:
+          type: number
+          description: |
+            (unix timestamp) Issued At date - As defined in rfc7519
+          example: 1758038912
+        idx:
+          type: number
+          minimum: 0
+          description: |
+            The index to revoke
+          example: 3
+        uri:
+          type: string
+          description: |
+            The URI of the Status List that holds the issued credential. The uri + idx combination is used to uniquely identify the entry to revoke
+          example: "https://crs.account.gov.uk/b/A671FED3E9AD"
+        jti:
+          type: string
+          description: |
+            JWT ID: A unique case sensitive string used as a identifier for the JWT, used to prevent replay attacks. Its value must be a lowercase UUID.
+          example: "db290616-1f3c-4ff9-939f-2749abdbacec"
+      required:
+        - alg
+        - typ
+        - kid
+        - iss
+        - iat
+        - idx
+        - jti
+        - uri
+      example: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+    RevokeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            ["Request processed for revocation", "Credential already revoked"]
+          description: Status message indicating the result
+        revokedAt:
+          type: number
+          minimum: 0
+          example: 1734709493
+          description: Unix timestamp when the credential was revoked
+      required:
+        - message
+        - revokedAt
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            [
+              "BAD_REQUEST",
+              "UNAUTHORIZED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "INTERNAL_SERVER_ERROR",
+            ]
+        error_description:
+          type: string
+          description: Detailed error message
+      required:
+        - error
+        - error_description
+
+paths:
+  /issue:
+    post:
+      tags:
+        - issue
+      summary: Issue a new Status List index
+      description: Issue a new index for credential status tracking
+      requestBody:
+        description: JOSE signed JWT containing issuer information and status expiry
+        content:
+          application/jwt:
+            schema:
+              $ref: "#/components/schemas/IssueRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueResponse"
+        "400":
+          description: Bad request - JWT validation failures and invalid requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_content_type:
+                  summary: Missing Content-Type header
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Content-Type header must be application/jwt"
+                jwt_decode_error:
+                  summary: JWT decoding failure
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Error decoding JWT or converting to JSON"
+                missing_iat:
+                  summary: Missing iat in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No iat in Payload"
+                missing_jti:
+                  summary: Missing jti in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No jti in Payload"
+                missing_status_expiry:
+                  summary: Missing statusExpiry in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No Status Expiry in Payload"
+                invalid_status_expiry:
+                  summary: Invalid statusExpiry value
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Status Expiry in Payload must be a non negative number and represent a future expiry date no more than 1 year from now"
+        "401":
+          description: Unauthorized - Authentication failures
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_kid:
+                  summary: Missing Key ID in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Key ID in Header"
+                invalid_kid:
+                  summary: Invalid Key ID in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Key ID in Header"
+                missing_typ:
+                  summary: Missing typ in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Type in Header"
+                invalid_typ:
+                  summary: Invalid typ in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Type in Header"
+                missing_alg:
+                  summary: Missing alg in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Algorithm in Header"
+                invalid_alg:
+                  summary: Invalid alg in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Algorithm in Header"
+                missing_iss:
+                  summary: Missing iss in payload
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Issuer in Payload"
+                non_matching_client_id:
+                  summary: JWT has non-matching Client ID
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "JWT has non-matching Client ID"
+                non_verified_signature:
+                  summary: Non-verified signature used to sign JWT
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "JWT has non-verified signature"
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/jwt:
+            statusCode: 200
+        httpMethod: "POST"
+        passthroughBehavior: "when_no_match"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IssueStatusFunction.Alias.AliasArn}/invocations"
+        type: "aws_proxy"
+
+  /revoke:
+    post:
+      tags:
+        - revoke
+      summary: Revoke a credential index
+      description: Revoke a previously issued credential Status List index
+      requestBody:
+        description: JOSE signed JWT containing the index and URI to revoke
+        content:
+          application/jwt:
+            schema:
+              $ref: "#/components/schemas/RevokeRequest"
+        required: true
+      responses:
+        "202":
+          description: Revocation processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevokeResponse"
+              examples:
+                new_revocation:
+                  summary: First time revocation
+                  value:
+                    message: "Request processed for revocation"
+                    revokedAt: 1734709493
+                already_revoked:
+                  summary: Already revoked credential
+                  value:
+                    message: "Credential already revoked"
+                    revokedAt: 1640995200
+        "400":
+          description: Bad request - JWT validation failures and invalid requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_content_type:
+                  summary: Missing Content-Type header
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Content-Type header must be application/jwt"
+                jwt_decode_error:
+                  summary: JWT decoding failure
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Error decoding JWT or converting to JSON"
+                missing_iat:
+                  summary: Missing iat in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No iat in Payload"
+                invalid_iat:
+                  summary: Invalid iat in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Invalid iat in Payload"
+                missing_jti:
+                  summary: Missing jti in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No jti in Payload"
+                invalid_jti:
+                  summary: Invalid jti in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Invalid jti in Payload"
+                missing_idx:
+                  summary: Missing idx in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No Index in Payload"
+                invalid_idx:
+                  summary: Invalid idx value
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Index must be a valid non-negative integer"
+                missing_uri:
+                  summary: Missing uri in payload
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "No valid URI in Payload"
+                invalid_uri_format:
+                  summary: Invalid URI format
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Invalid URI format in payload"
+        "401":
+          description: Unauthorized - Authentication failures
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_kid:
+                  summary: Missing Key ID in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Key ID in Header"
+                invalid_kid:
+                  summary: Invalid Key ID in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Key ID in Header"
+                missing_typ:
+                  summary: Missing typ in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Type in Header"
+                invalid_typ:
+                  summary: Invalid typ in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Type in Header"
+                missing_alg:
+                  summary: Missing alg in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Algorithm in Header"
+                invalid_alg:
+                  summary: Invalid alg in header
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "Invalid Algorithm in Header"
+                missing_iss:
+                  summary: Missing iss in payload
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "No Issuer in Payload"
+                non_matching_client_id:
+                  summary: JWT has non-matching Client ID
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "JWT has non-matching Client ID"
+                non_verified_signature:
+                  summary: Non-verified signature used to sign JWT
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "JWT has non-verified signature"
+                client_mismatch:
+                  summary: Client ID mismatch with original issuer
+                  value:
+                    error: "UNAUTHORIZED"
+                    error_description: "The original clientId is different to the clientId in the request"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                db_validation_error:
+                  summary: Failed to validate status list entry
+                  value:
+                    error: "FORBIDDEN"
+                    error_description: "Unable to revoke the specified status list entry"
+        "404":
+          description: Not found - Entry lookup failures #logic does not exist currently, see comment in revoke handler
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                entry_not_found:
+                  summary: Entry not found in database
+                  value:
+                    error: "NOT_FOUND"
+                    error_description: "Entry not found in status list table"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                database_query_error:
+                  summary: Database query failure
+                  value:
+                    error: "INTERNAL_SERVER_ERROR"
+                    error_description: "Error querying database for status list entry"
+                database_update_error:
+                  summary: Database update failure
+                  value:
+                    error: "INTERNAL_SERVER_ERROR"
+                    error_description: "Error updating revokedAt field"
+      x-amazon-apigateway-integration:
+        requestTemplates:
+          application/jwt:
+            statusCode: 202
+        httpMethod: "POST"
+        passthroughBehavior: "when_no_match"
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RevokeStatusFunction.Alias.AliasArn}/invocations"
+        type: "aws_proxy"

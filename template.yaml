@@ -151,7 +151,7 @@ Resources:
         Fn::Transform:
           Name: AWS::Include
           Parameters:
-            Location: ./api-spec.yaml
+            Location: ./openApiSpec/mock/api-spec.yaml
 
   ApiAccessLogs:
     Type: AWS::Logs::LogGroup
