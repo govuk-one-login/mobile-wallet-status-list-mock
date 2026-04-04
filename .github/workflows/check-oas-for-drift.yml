@@ -48,7 +48,7 @@ jobs:
           base: ${{ env.CRS_CHECKOUT_PATH }}/${{ env.CRS_OAS_PATH }}
           revision: ${{ env.LOCAL_OAS_PATH }}
           fail-on-diff: true
-          exclude-elements: extensions
+#          exclude-elements: extensions
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
