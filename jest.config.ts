@@ -4,7 +4,7 @@ export default {
     ["jest-junit", { outputDirectory: "results", outputName: "report.xml" }],
   ],
   collectCoverage: true,
-  collectCoverageFrom: ["src/**"],
+  collectCoverageFrom: ["src/**", "test/conformance/helpers/**"],
   coveragePathIgnorePatterns: [
     "/node_modules/",
     "src/types/",
