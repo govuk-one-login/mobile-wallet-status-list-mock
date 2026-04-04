@@ -26,11 +26,11 @@ export interface SuiteConfig {
 
 async function postToRevoke(
   body: string,
-  contentType: string,
+  contentType?: string,
 ): Promise<Response> {
   return fetch(`${PRISM_BASE_URL}/revoke`, {
     method: "POST",
-    headers: { "Content-Type": contentType },
+    headers: contentType ? { "Content-Type": contentType } : {},
     body,
   });
 }
@@ -68,6 +68,11 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
         expect(res.status).toBe(202);
       });
 
+      it("rejects a request with no Content-Type with 422", async () => {
+        const res = await postToRevoke(REVOKE_JWT);
+        expect(res.status).toBe(422);
+      });
+
       it("rejects Content-Type: application/json with 422", async () => {
         const res = await postToRevoke("{}", "application/json");
         expect(res.status).toBe(422);
@@ -94,6 +99,7 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
 
         expect(res.status).toBe(202);
         expect(typeof body.revokedAt).toBe("number");
+        expect(body.revokedAt).toBeGreaterThanOrEqual(0);
       });
     });
   });
