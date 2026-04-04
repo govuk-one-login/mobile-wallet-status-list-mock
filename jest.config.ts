@@ -9,6 +9,7 @@ export default {
     "/node-modules/",
     "src/types/",
     "src/common/types/",
+    "test/conformance/",
   ],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
