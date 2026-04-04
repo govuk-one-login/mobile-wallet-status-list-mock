@@ -14,6 +14,7 @@ export default {
   coverageProvider: "v8",
   preset: "ts-jest",
   testMatch: ["**/*.test.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/test/conformance/"],
   testEnvironment: "node",
   clearMocks: true,
 };
