@@ -1,5 +1,6 @@
 import { ChildProcess, spawn } from "node:child_process";
 import path from "node:path";
+import { expectStatus } from "../helpers/expectStatus";
 import { waitForPort } from "../helpers/waitForPort";
 
 const PRISM_PORT = 4010;
@@ -65,22 +66,22 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
     describe("Request validation", () => {
       it("proxies a request with Content-Type: application/jwt", async () => {
         const res = await postToRevoke(REVOKE_JWT, "application/jwt");
-        expect(res.status).toBe(202);
+        await expectStatus(res, 202);
       });
 
       it("rejects a request with no Content-Type with 422", async () => {
         const res = await postToRevoke(REVOKE_JWT);
-        expect(res.status).toBe(422);
+        await expectStatus(res, 422);
       });
 
       it("rejects Content-Type: application/json with 422", async () => {
         const res = await postToRevoke("{}", "application/json");
-        expect(res.status).toBe(422);
+        await expectStatus(res, 422);
       });
 
       it("rejects Content-Type: text/plain with 422", async () => {
         const res = await postToRevoke("some-text", "text/plain");
-        expect(res.status).toBe(422);
+        await expectStatus(res, 422);
       });
     });
 
@@ -89,7 +90,7 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
         const res = await postToRevoke(REVOKE_JWT, "application/jwt");
         const body = await res.json();
 
-        expect(res.status).toBe(202);
+        await expectStatus(res, 202);
         expect(body.message).toBe("Request processed for revocation");
       });
 
@@ -97,7 +98,7 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
         const res = await postToRevoke(REVOKE_JWT, "application/jwt");
         const body = await res.json();
 
-        expect(res.status).toBe(202);
+        await expectStatus(res, 202);
         expect(typeof body.revokedAt).toBe("number");
         expect(body.revokedAt).toBeGreaterThanOrEqual(0);
       });

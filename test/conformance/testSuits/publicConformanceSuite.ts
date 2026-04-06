@@ -1,5 +1,6 @@
 import { ChildProcess, spawn } from "node:child_process";
 import path from "node:path";
+import { expectStatus } from "../helpers/expectStatus";
 import { waitForPort } from "../helpers/waitForPort";
 
 const PRISM_PORT = 4011; // port 4010 is used by the private spec suites
@@ -51,7 +52,7 @@ export function publicConformanceSuite(config: PublicSuiteConfig): void {
       it("200 response contains Content-Type: application/statuslist+jwt", async () => {
         const res = await fetch(`${PRISM_BASE_URL}/t/${tIdentifier}`);
 
-        expect(res.status).toBe(200);
+        await expectStatus(res, 200);
         expect(res.headers.get("content-type")).toContain(
           "application/statuslist+jwt",
         );
@@ -60,14 +61,8 @@ export function publicConformanceSuite(config: PublicSuiteConfig): void {
       it("200 response body passes Prism schema validation", async () => {
         const res = await fetch(`${PRISM_BASE_URL}/t/${tIdentifier}`);
 
-        expect(res.status).toBe(200);
+        await expectStatus(res, 200);
       });
-
-      // it("returns 404 for an unknown identifier", async () => {
-      //   const res = await fetch(`${PRISM_BASE_URL}/t/unknown-identifier`);
-      //
-      //   expect(res.status).toBe(404);
-      // });
     });
   });
 }

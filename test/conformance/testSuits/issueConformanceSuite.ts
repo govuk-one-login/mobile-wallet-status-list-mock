@@ -1,5 +1,6 @@
 import { ChildProcess, spawn } from "node:child_process";
 import path from "node:path";
+import { expectStatus } from "../helpers/expectStatus";
 import { waitForPort } from "../helpers/waitForPort";
 
 const PRISM_PORT = 4010;
@@ -18,10 +19,7 @@ export interface SuiteConfig {
   setup: () => Promise<void>;
 }
 
-async function postToIssue(
-  body: string,
-  contentType?: string,
-): Promise<Response> {
+async function postToIssue(body: string, contentType?: string) {
   return fetch(`${PRISM_BASE_URL}/issue`, {
     method: "POST",
     headers: contentType ? { "Content-Type": contentType } : {},
@@ -59,22 +57,22 @@ export function issueConformanceSuite(config: SuiteConfig): void {
     describe("Request validation", () => {
       it("proxies a request with Content-Type: application/jwt", async () => {
         const res = await postToIssue("a.valid.jwt", "application/jwt");
-        expect(res.status).toBe(200);
+        await expectStatus(res, 200);
       });
 
       it("rejects a request with no Content-Type with 422", async () => {
         const res = await postToIssue("a.valid.jwt");
-        expect(res.status).toBe(422);
+        await expectStatus(res, 422);
       });
 
       it("rejects Content-Type: application/json with 422", async () => {
         const res = await postToIssue("{}", "application/json");
-        expect(res.status).toBe(422);
+        await expectStatus(res, 422);
       });
 
       it("rejects Content-Type: text/plain with 422", async () => {
         const res = await postToIssue("some-text", "text/plain");
-        expect(res.status).toBe(422);
+        await expectStatus(res, 422);
       });
     });
 
@@ -83,7 +81,7 @@ export function issueConformanceSuite(config: SuiteConfig): void {
         const res = await postToIssue("a.valid.jwt", "application/jwt");
         const body = await res.json();
 
-        expect(res.status).toBe(200);
+        await expectStatus(res, 200);
         expect(typeof body.idx).toBe("number");
         expect(body.idx).toBeGreaterThanOrEqual(0);
       });
@@ -92,7 +90,7 @@ export function issueConformanceSuite(config: SuiteConfig): void {
         const res = await postToIssue("a.valid.jwt", "application/jwt");
         const body = await res.json();
 
-        expect(res.status).toBe(200);
+        await expectStatus(res, 200);
         expect(typeof body.uri).toBe("string");
       });
     });
