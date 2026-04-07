@@ -81,7 +81,7 @@ Replace `{id}` with the actual token ID (e.g., `81d8809a-79c3-45b3-9fa1-4108c49f
 
 | Document | Description |
 |---|---|
-| [`docs/infra.md`](docs/infra.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
+| [`docs/infra.md`](docs/infrastructure.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
 
 ## OpenAPI Specifications
 
