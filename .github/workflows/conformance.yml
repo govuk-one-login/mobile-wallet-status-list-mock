@@ -4,15 +4,18 @@ on:
   push:
     branches:
       - DCMAW-19303
+  schedule:
+    # runs at midnight every day
+    - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
       environment:
         description: Target environment to run conformance tests against
         required: true
-        default: integration
+        default: build
         type: choice
         options:
-          - integration
+          - dev
           - build
 
 concurrency:
@@ -52,15 +55,8 @@ jobs:
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
-    runs-on: ubuntu-24.04
     needs: [ prism-conformance ]
     if: failure()
-    steps:
-      - name: Send Slack alert
-        uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
-        with:
-          webhook: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            "repository": "${{ github.repository }}"
-            "run": ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    uses: ./.github/workflows/notify-slack-on-failure.yml
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
