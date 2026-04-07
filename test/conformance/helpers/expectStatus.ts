@@ -4,9 +4,9 @@ export async function expectStatus(
 ): Promise<void> {
   try {
     expect(res.status).toBe(expected);
-  } catch (e) {
+  } catch (error) {
     const body = await res.text();
     console.error(`Expected ${expected}, got ${res.status}. Body:`, body);
-    throw e;
+    throw error;
   }
 }

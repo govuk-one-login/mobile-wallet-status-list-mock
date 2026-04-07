@@ -1,17 +1,15 @@
 import { expectStatus } from "./expectStatus";
 
-function makeResponse(status: number, body: string): Response {
-  return new Response(body, { status });
-}
-
 describe("expectStatus", () => {
   it("resolves when the status matches", async () => {
-    const res = makeResponse(200, "ok");
+    const res = new Response("ok", { status: 200 });
+
     await expect(expectStatus(res, 200)).resolves.toBeUndefined();
   });
 
   it("rejects when the status does not match", async () => {
-    const res = makeResponse(422, "unprocessable");
+    const res = new Response("unprocessable", { status: 422 });
+
     await expect(expectStatus(res, 200)).rejects.toThrow();
   });
 
@@ -19,7 +17,7 @@ describe("expectStatus", () => {
     const consoleSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    const res = makeResponse(500, "internal error");
+    const res = new Response("internal error", { status: 500 });
 
     await expect(expectStatus(res, 200)).rejects.toThrow();
 
@@ -34,7 +32,7 @@ describe("expectStatus", () => {
     const consoleSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    const res = makeResponse(202, "accepted");
+    const res = new Response("accepted", { status: 202 });
 
     await expectStatus(res, 202);
 
