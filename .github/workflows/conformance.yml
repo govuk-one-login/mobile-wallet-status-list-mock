@@ -19,12 +19,12 @@ on:
           - build
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.environment }}
+  group: ${{ github.workflow }}-${{ inputs.environment || 'build' }}
   cancel-in-progress: true
 
 jobs:
-  prism-conformance:
-    name: Prism Conformance Tests (${{ inputs.environment }})
+  conformance-tests:
+    name: Prism Conformance Tests (${{ inputs.environment || 'build' }})
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -55,7 +55,7 @@ jobs:
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
-    needs: [ prism-conformance ]
+    needs: [ conformance-tests ]
     if: failure()
     uses: ./.github/workflows/notify-slack-on-failure.yml
     secrets:
