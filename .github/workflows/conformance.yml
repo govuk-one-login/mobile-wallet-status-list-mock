@@ -1,9 +1,6 @@
 name: OAS Conformance Tests
 
 on:
-  push:
-    branches:
-      - DCMAW-19303
   schedule:
     # runs at midnight every day
     - cron: '0 0 * * *'
@@ -30,8 +27,7 @@ jobs:
     permissions:
       contents: read
     env:
-#      TODO: Update URLs, using dev URLs for testing
-      UPSTREAM_URL: ${{ inputs.environment == 'build' && 'https://status-list-mock.wallet-onboarding.dev.account.gov.uk' || 'https://status-list-mock.wallet-onboarding.dev.account.gov.uk' }}
+      UPSTREAM_URL: ${{ inputs.environment == 'build' && 'https://status-list-mock.wallet-onboarding.build.account.gov.uk' || 'https://status-list-mock.wallet-onboarding.dev.account.gov.uk' }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
