@@ -1,15 +1,3 @@
-// Jest config for local Prism conformance tests that run against real Lambda
-// handlers via SAM local. Need this Separate from jest.config.ts for two reasons:
-//
-// 1. These tests require LocalStack + SAM local to be running
-//    before Jest starts. Running them as part of `npm test` would cause failures
-//    for any developer who hasn't started the stack.
-//
-// 2. SAM local incurs a Lambda cold start on the first invocation, so these
-//    tests need a much longer timeout than unit tests. 60s covers cold start
-//    (~10s), Prism startup, and the requests themselves.
-//
-// Run with: npm run test:prism:local (after `npm run dev`)
 export default {
   preset: "ts-jest",
   testMatch: ["**/test/conformance/**/*.prism.*.test.ts"], // matches both local and ci conformance tests
