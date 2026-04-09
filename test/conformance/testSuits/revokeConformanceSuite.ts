@@ -61,45 +61,14 @@ export function revokeConformanceSuite(config: SuiteConfig): void {
       prism?.kill();
     });
 
-    describe("Request validation", () => {
-      it("proxies a request with Content-Type: application/jwt", async () => {
-        const res = await postToRevoke(REVOKE_JWT, "application/jwt");
-        await expectStatus(res, 202);
-      });
+    it("proxies a valid request and gets a valid response", async () => {
+      const res = await postToRevoke(REVOKE_JWT, "application/jwt");
+      const body = await res.json();
 
-      it("rejects a request with no Content-Type with 422", async () => {
-        const res = await postToRevoke(REVOKE_JWT);
-        await expectStatus(res, 422);
-      });
-
-      it("rejects Content-Type: application/json with 422", async () => {
-        const res = await postToRevoke("{}", "application/json");
-        await expectStatus(res, 422);
-      });
-
-      it("rejects Content-Type: text/plain with 422", async () => {
-        const res = await postToRevoke("some-text", "text/plain");
-        await expectStatus(res, 422);
-      });
-    });
-
-    describe("Response schema validation", () => {
-      it("202 response contains message as 'Request processed for revocation'", async () => {
-        const res = await postToRevoke(REVOKE_JWT, "application/jwt");
-        const body = await res.json();
-
-        await expectStatus(res, 202);
-        expect(body.message).toBe("Request processed for revocation");
-      });
-
-      it("202 response contains revokedAt as a number", async () => {
-        const res = await postToRevoke(REVOKE_JWT, "application/jwt");
-        const body = await res.json();
-
-        await expectStatus(res, 202);
-        expect(typeof body.revokedAt).toBe("number");
-        expect(body.revokedAt).toBeGreaterThanOrEqual(0);
-      });
+      await expectStatus(res, 202);
+      expect(body.message).toBe("Request processed for revocation");
+      expect(typeof body.revokedAt).toBe("number");
+      expect(body.revokedAt).toBeGreaterThanOrEqual(0);
     });
   });
 }

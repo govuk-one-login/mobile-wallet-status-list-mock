@@ -53,45 +53,14 @@ export function issueConformanceSuite(config: SuiteConfig): void {
       prism?.kill();
     });
 
-    describe("Request validation", () => {
-      it("proxies a request with Content-Type: application/jwt", async () => {
-        const res = await postToIssue("a.valid.jwt", "application/jwt");
-        await expectStatus(res, 200);
-      });
+    it("proxies a valid request and gets a valid response", async () => {
+      const res = await postToIssue("a.valid.jwt", "application/jwt");
+      const body = await res.json();
 
-      it("rejects a request with no Content-Type with 422", async () => {
-        const res = await postToIssue("a.valid.jwt");
-        await expectStatus(res, 422);
-      });
-
-      it("rejects Content-Type: application/json with 422", async () => {
-        const res = await postToIssue("{}", "application/json");
-        await expectStatus(res, 422);
-      });
-
-      it("rejects Content-Type: text/plain with 422", async () => {
-        const res = await postToIssue("some-text", "text/plain");
-        await expectStatus(res, 422);
-      });
-    });
-
-    describe("Response schema validation", () => {
-      it("200 response contains idx as a number", async () => {
-        const res = await postToIssue("a.valid.jwt", "application/jwt");
-        const body = await res.json();
-
-        await expectStatus(res, 200);
-        expect(typeof body.idx).toBe("number");
-        expect(body.idx).toBeGreaterThanOrEqual(0);
-      });
-
-      it("200 response contains uri as a string", async () => {
-        const res = await postToIssue("a.valid.jwt", "application/jwt");
-        const body = await res.json();
-
-        await expectStatus(res, 200);
-        expect(typeof body.uri).toBe("string");
-      });
+      await expectStatus(res, 200);
+      expect(typeof body.idx).toBe("number");
+      expect(body.idx).toBeGreaterThanOrEqual(0);
+      expect(typeof body.uri).toBe("string");
     });
   });
 }

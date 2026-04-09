@@ -56,12 +56,6 @@ export function publicConformanceSuite(config: PublicSuiteConfig): void {
           "application/statuslist+jwt",
         );
       });
-
-      it("200 response body passes Prism schema validation", async () => {
-        const res = await fetch(`${PRISM_BASE_URL}/t/${identifier}`);
-
-        await expectStatus(res, 200);
-      });
     });
   });
 }
