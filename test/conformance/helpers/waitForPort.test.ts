@@ -46,13 +46,12 @@ describe("waitForPort", () => {
     expect(socket.destroy).toHaveBeenCalled();
   });
 
-  it("retries after 250ms when an error occurs and deadline has not passed", async () => {
-    let callCount = 0;
-
-    mockNet.connect = jest.fn().mockImplementation(() => {
-      callCount++;
-      return makeSocket(callCount < 3 ? "error" : "connect");
-    });
+  it("resolves after retrying when the port is not immediately open", async () => {
+    mockNet.connect = jest
+      .fn()
+      .mockReturnValueOnce(makeSocket("error"))
+      .mockReturnValueOnce(makeSocket("error"))
+      .mockReturnValueOnce(makeSocket("connect"));
 
     const promise = waitForPort(3000, "127.0.0.1", 15000);
     await jest.runAllTimersAsync();
@@ -62,21 +61,17 @@ describe("waitForPort", () => {
   });
 
   it("destroys the socket on error before retrying", async () => {
-    let callCount = 0;
-    const sockets: ReturnType<typeof makeSocket>[] = [];
-
-    mockNet.connect = jest.fn().mockImplementation(() => {
-      callCount++;
-      const socket = makeSocket(callCount < 2 ? "error" : "connect");
-      sockets.push(socket);
-      return socket;
-    });
+    const errorSocket = makeSocket("error");
+    mockNet.connect = jest
+      .fn()
+      .mockReturnValueOnce(errorSocket)
+      .mockReturnValueOnce(makeSocket("connect"));
 
     const promise = waitForPort(3000, "127.0.0.1", 15000);
     await jest.runAllTimersAsync();
     await promise;
 
-    expect(sockets[0].destroy).toHaveBeenCalled();
+    expect(errorSocket.destroy).toHaveBeenCalled();
   });
 
   it("rejects when the deadline is exceeded", async () => {
