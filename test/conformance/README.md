@@ -76,7 +76,7 @@ a clear error if not.
 
 ## OAS drift detection
 
-The CRS spec copies in this repo (`crs-private-spec.yaml`, `crs-public-spec.yaml`) must
+The CRS spec copied in this repo (`crs-private-spec.yaml`, `crs-public-spec.yaml`) must
 stay in sync with the upstream CRS service. The `check-oas-for-drift` workflow runs daily
 and on every PR — it clones the `crs-backend` repo and uses
 [oasdiff](https://github.com/oasdiff/oasdiff) to diff the upstream spec against the local
@@ -88,6 +88,25 @@ a service that no longer matches the real CRS contract, or fail for the wrong re
 
 **If both `check-oas-for-drift` and the conformance tests fail at the same time, update
 the spec copy first.** The conformance failure is likely a symptom of the drift.
+
+### How Prism tests and OAS Diff work together
+
+Drift detection ensures the spec copies in this repo stay in sync with the upstream CRS
+spec. Conformance tests ensure the deployed service honours those specs. If the real CRS
+contract changes, drift detection catches it. If a code or infrastructure change breaks
+the mock's behaviour, conformance tests catch it.
+
+## When the conformance tests fail
+
+A Slack alert is sent to the OP channel on failure. The cause will be one of:
+
+- **422 from Prism** — request violated the OAS spec (e.g. wrong Content-Type). Check the test or spec.
+- **Unexpected status code** — service returned an error (e.g. 500 instead of 200). Check the service or infrastructure.
+- **Response schema mismatch** — service response does not match the OAS schema. Compare the response against `crs-private-spec.yaml` or `crs-public-spec.yaml`.
+- **Prism failed to start** — upstream unreachable. Verify the deployment completed and `UPSTREAM_URL` is correct.
+
+If `check-oas-for-drift` has also failed, update the spec copy first — the two failures are likely related.
+
 
 ## Known gaps
 
