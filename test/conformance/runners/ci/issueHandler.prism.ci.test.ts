@@ -8,9 +8,7 @@ issueConformanceSuite({
   upstream: UPSTREAM_URL,
   beforeAllTimeout: 30000,
   setup: async () => {
-    // Fail fast if the deployed endpoint is not reachable. Uses a short
-    // AbortSignal timeout rather than waitForPort because the upstream is
-    // HTTPS, not a raw TCP port.
+    // Fail fast if the deployed endpoint is not reachable.
     const reachable = await fetch(`${UPSTREAM_URL}/issue`, {
       method: "POST",
       headers: { "Content-Type": "application/jwt" },
@@ -21,7 +19,7 @@ issueConformanceSuite({
     if (!reachable) {
       throw new Error(
         `Upstream at ${UPSTREAM_URL} is not reachable. ` +
-          "Check that the environment is deployed and UPSTREAM_URL is correct.",
+          "Check the service is deployed and UPSTREAM_URL is correct.",
       );
     }
   },

@@ -15,7 +15,6 @@ const apiSpec = path.resolve(
 export interface SuiteConfig {
   upstream: string;
   beforeAllTimeout: number;
-  // Health check and optional warm-up — called before Prism is spawned.
   setup: () => Promise<void>;
 }
 

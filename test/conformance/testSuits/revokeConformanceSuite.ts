@@ -12,16 +12,14 @@ const apiSpec = path.resolve(
   "openApiSpec/crs/crs-private-spec.yaml",
 );
 
-// Minimal JWT with uri and idx claims required by the revoke handler.
-// Signature is not verified by the handler (JWT validation not yet implemented).
-// Payload: { iss, iat, exp, idx: 0 (number), uri }
+// Minimal JWT required by the revoke handler. Signature is not verified.
+// Decoded payload: { iss, iat, exp, idx: 0, uri }
 const REVOKE_JWT =
   "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnb3YudWsiLCJpYXQiOjE3NTY0NTcxMjAsImV4cCI6MTc4Nzk5MzEyMCwiaWR4IjowLCJ1cmkiOiJodHRwczovL3Rlc3Qtc3RhdHVzLWxpc3QuY29tL3QvMzY5NDAxOTAtZTZhZi00MmQwLTkxODEtNzRjOTQ0ZGM0YWY3In0.test-signature";
 
 export interface SuiteConfig {
   upstream: string;
   beforeAllTimeout: number;
-  // Health check and optional warm-up — called before Prism is spawned.
   setup: () => Promise<void>;
 }
 

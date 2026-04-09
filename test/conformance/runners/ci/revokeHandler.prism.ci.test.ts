@@ -8,9 +8,7 @@ revokeConformanceSuite({
   upstream: UPSTREAM_URL,
   beforeAllTimeout: 30000,
   setup: async () => {
-    // Fail fast if the deployed endpoint is not reachable. Uses a short
-    // AbortSignal timeout rather than waitForPort because the upstream is
-    // HTTPS, not a raw TCP port.
+    // Fail fast if the deployed endpoint is not reachable. 
     const reachable = await fetch(`${UPSTREAM_URL}/revoke`, {
       method: "POST",
       headers: { "Content-Type": "application/jwt" },
