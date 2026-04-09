@@ -1,7 +1,7 @@
 // Jest config for local Prism conformance tests that run against real Lambda
 // handlers via SAM local. Need this Separate from jest.config.ts for two reasons:
 //
-// 1. These tests require the local stack (LocalStack + SAM local) to be running
+// 1. These tests require LocalStack + SAM local to be running
 //    before Jest starts. Running them as part of `npm test` would cause failures
 //    for any developer who hasn't started the stack.
 //
