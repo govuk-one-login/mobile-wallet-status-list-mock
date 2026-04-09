@@ -8,7 +8,7 @@ revokeConformanceSuite({
   upstream: UPSTREAM_URL,
   beforeAllTimeout: 30000,
   setup: async () => {
-    // Fail fast if the deployed endpoint is not reachable. 
+    // Fail fast if the deployed endpoint is not reachable.
     const reachable = await fetch(`${UPSTREAM_URL}/revoke`, {
       method: "POST",
       headers: { "Content-Type": "application/jwt" },

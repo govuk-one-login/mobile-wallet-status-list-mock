@@ -18,7 +18,7 @@ issueConformanceSuite({
       );
     }
 
-    // Trigger the Lambda cold start before assertions begin. 
+    // Trigger the Lambda cold start before assertions begin.
     await fetch(`http://127.0.0.1:${SAM_PORT}/issue`, {
       method: "POST",
       headers: { "Content-Type": "application/jwt" },
