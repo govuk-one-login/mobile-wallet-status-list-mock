@@ -22,8 +22,8 @@ test/conformance/
   helpers/                      Wait for port utility
   testSuits/                    Factory functions, add test cases here
   runners/                      Config and runtime setup 
-    local/                      Runs against SAM local (localhost:3000)
     ci/                         Runs against deployed service (UPSTREAM_URL)
+    local/                      Runs against locally running service (localhost:3000)
 ```
 
 Each suite is a factory function. Runner files call the factory with environment-specific
