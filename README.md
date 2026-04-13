@@ -102,5 +102,3 @@ The `check-oas-for-drift` workflow clones the `crs-backend` repo and uses [oasdi
 to diff its spec against the copy in this repo. Any difference will fail the workflow. When the workflow fails, a 
 notification is sent to the OP Slack channel and engineers should action the diff as a priority by updating 
 `openApiSpec/crs/crs-private-spec.yaml` to reflect the upstream changes.
-
-TEST
