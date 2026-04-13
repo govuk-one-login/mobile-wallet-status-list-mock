@@ -77,6 +77,12 @@ aws --endpoint-url=http://localhost:4562 s3 cp s3://status-list/t/{id} -
 Replace `{id}` with the actual token ID (e.g., `81d8809a-79c3-45b3-9fa1-4108c49f240c`).
 ```
 
+## Further Documentation
+
+| Document | Description |
+|---|---|
+| [`docs/infrastructure.md`](docs/infrastructure.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
+
 ## OpenAPI Specifications
 
 This repo contains the following OpenAPI specs under `openApiSpec/`:
