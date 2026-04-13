@@ -20,6 +20,7 @@ jobs:
     name: Check Status List OAS for Drift
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    if: github.actor != 'dependabot[bot]'
     permissions:
       contents: read
     env:
