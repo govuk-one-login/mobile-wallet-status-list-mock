@@ -1,7 +1,6 @@
 # Conformance Tests
 
-Prism proxy-mode conformance tests that verify the deployed service matches its OAS
-contract end-to-end.
+Prism proxy mode conformance tests verify that the deployed Status List Mock service matches its OpenAPI specification (OAS) contract end-to-end.
 
 ## How it works
 
