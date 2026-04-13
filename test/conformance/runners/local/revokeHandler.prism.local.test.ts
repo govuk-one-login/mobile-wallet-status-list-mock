@@ -14,7 +14,7 @@ revokeConformanceSuite({
     } catch {
       throw new Error(
         `SAM local API is not running on port ${SAM_PORT}. ` +
-          "Start the local stack with `npm run dev` before running these tests.",
+          "Start the service locally with `npm run dev` before running these tests.",
       );
     }
 

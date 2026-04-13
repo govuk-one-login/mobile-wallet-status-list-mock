@@ -19,7 +19,7 @@ revokeConformanceSuite({
     if (!reachable) {
       throw new Error(
         `Upstream at ${UPSTREAM_URL} is not reachable. ` +
-          "Check that the environment is deployed and UPSTREAM_URL is correct.",
+          "Check that service is deployed and UPSTREAM_URL is correct.",
       );
     }
   },
