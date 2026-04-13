@@ -4,9 +4,9 @@ export default {
     ["jest-junit", { outputDirectory: "results", outputName: "report.xml" }],
   ],
   collectCoverage: true,
-  collectCoverageFrom: ["src/**"],
+  collectCoverageFrom: ["src/**", "test/conformance/helpers/**"],
   coveragePathIgnorePatterns: [
-    "/node-modules/",
+    "/node_modules/",
     "src/types/",
     "src/common/types/",
   ],
@@ -14,6 +14,7 @@ export default {
   coverageProvider: "v8",
   preset: "ts-jest",
   testMatch: ["**/*.test.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/test/conformance/runners/"],
   testEnvironment: "node",
   clearMocks: true,
 };
