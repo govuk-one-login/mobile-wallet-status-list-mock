@@ -50,11 +50,13 @@ export function publicConformanceSuite(config: PublicSuiteConfig): void {
     describe("Response schema validation", () => {
       it("200 response contains Content-Type: application/statuslist+jwt", async () => {
         const res = await fetch(`${PRISM_BASE_URL}/t/${identifier}`);
+        const body = await res.text();
 
         await expectStatus(res, 200);
         expect(res.headers.get("content-type")).toContain(
           "application/statuslist+jwt",
         );
+        expect(typeof body).toBe("string");
       });
     });
   });
