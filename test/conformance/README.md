@@ -110,5 +110,5 @@ If `check-oas-for-drift` has also failed, update the spec copy first — the two
 
 ## Known gaps
 
-Error response cases (400, 401, 403, 404 for `/issue` and `/revoke`) are not yet covered.
+Error response cases (400, 401, 403, 404 for `/issue` and `/revoke`) are not covered because the mock only implements the happy path. Testing error scenarios would require the mock handlers to implement JWT claim validation and return the appropriate error responses.
 They are blocked on the handlers implementing JWT claim validation.
