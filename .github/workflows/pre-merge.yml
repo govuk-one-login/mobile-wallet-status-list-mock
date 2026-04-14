@@ -73,6 +73,7 @@ jobs:
   check-oas-for-drift:
     name: Check Status List OAS for drift
     uses: ./.github/workflows/check-oas-for-drift.yml
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     secrets:
       WALLET_CRS_DEPLOY_KEY: ${{ secrets.WALLET_CRS_DEPLOY_KEY }}
       GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
