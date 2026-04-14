@@ -1,0 +1,58 @@
+name: OAS Conformance Tests
+
+on:
+  schedule:
+    # runs at midnight every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment to run conformance tests against
+        required: true
+        default: build
+        type: choice
+        options:
+          - dev
+          - build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.environment || 'build' }}
+  cancel-in-progress: true
+
+jobs:
+  conformance-tests:
+    name: Prism Conformance Tests (${{ inputs.environment || 'build' }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      UPSTREAM_URL: ${{ inputs.environment == 'build' && 'https://status-list-mock.wallet-onboarding.build.account.gov.uk' || 'https://status-list-mock.wallet-onboarding.dev.account.gov.uk' }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run Prism conformance tests
+        run: npm run test:conformance:ci
+
+      - name: Stop Prism
+        if: always()
+        run: pkill -f "prism proxy" || true
+
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    needs: [ conformance-tests ]
+    if: failure()
+    uses: ./.github/workflows/notify-slack-on-failure.yml
+    secrets:
+      GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL: ${{ secrets.GH_WORKFLOW_FAILURE_BOT_SLACK_WEBHOOK_URL }}
