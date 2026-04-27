@@ -198,6 +198,12 @@ Resources:
       Type: A
 
   IssueFunction:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_116
+            rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+            comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
     Type: AWS::Serverless::Function
     DependsOn:
       - IssueFunctionLogGroup
@@ -317,6 +323,12 @@ Resources:
       RetentionInDays: 30
 
   RevokeFunction:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_116
+            rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+            comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
     Type: AWS::Serverless::Function
     DependsOn:
       - RevokeFunctionLogGroup
