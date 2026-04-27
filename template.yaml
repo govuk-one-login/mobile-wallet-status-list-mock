@@ -198,16 +198,15 @@ Resources:
       Type: A
 
   IssueFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - IssueFunctionLogGroup
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_116
             rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
             comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
-    Type: AWS::Serverless::Function
-    DependsOn:
-      - IssueFunctionLogGroup
-    Metadata:
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -323,16 +322,15 @@ Resources:
       RetentionInDays: 30
 
   RevokeFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - RevokeFunctionLogGroup
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_116
             rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
             comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
-    Type: AWS::Serverless::Function
-    DependsOn:
-      - RevokeFunctionLogGroup
-    Metadata:
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -452,6 +450,11 @@ Resources:
     DependsOn:
       - JwksFunctionLogGroup
     Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_116
+            rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+            comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
