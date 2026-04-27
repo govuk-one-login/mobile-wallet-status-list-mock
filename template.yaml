@@ -134,7 +134,7 @@ Resources:
       Description: Regional API gateway for the Status List Mock
       StageName: !Ref Environment
       CacheClusterEnabled: true
-      CacheClusterSize: 0.5
+      CacheClusterSize: "0.5"
       TracingEnabled: true
       OpenApiVersion: 3.0.0
       AccessLogSetting:
@@ -157,13 +157,13 @@ Resources:
             Location: ./openApiSpec/mock/api-spec.yaml
 
   ApiAccessLogs:
+    Type: AWS::Logs::LogGroup
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_158
-            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
             comment: KMS encryption not required as log group will not contain sensitive data.
-    Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-access-logs
       RetentionInDays: 30
@@ -206,13 +206,13 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_116
-            rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+            rule: Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)
             comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
           - id: CKV_AWS_115
-            rule: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+            rule: Ensure that AWS Lambda function is configured for function-level concurrent execution limit
             comment: Only deployed to low-traffic environments where concurrency is not a concern.
           - id: CKV_AWS_173
-            rule: "Check encryption settings for Lambda environment variable"
+            rule: Check encryption settings for Lambda environment variable
             comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
@@ -317,13 +317,13 @@ Resources:
         - !Ref AWS::NoValue
 
   IssueFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_158
-            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
             comment: KMS encryption not required as log group will not contain sensitive data.
-    Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue
       RetentionInDays: 30
@@ -336,13 +336,13 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_116
-            rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+            rule: Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)
             comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
           - id: CKV_AWS_115
-            rule: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+            rule: Ensure that AWS Lambda function is configured for function-level concurrent execution limit
             comment: Only deployed to low-traffic environments where concurrency is not a concern.
           - id: CKV_AWS_173
-            rule: "Check encryption settings for Lambda environment variable"
+            rule: Check encryption settings for Lambda environment variable
             comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
@@ -447,13 +447,13 @@ Resources:
         - !Ref AWS::NoValue
 
   RevokeFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_158
-            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
             comment: KMS encryption not required as log group will not contain sensitive data.
-    Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
       RetentionInDays: 30
@@ -466,13 +466,13 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_116
-            rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
+            rule: Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)
             comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
           - id: CKV_AWS_115
-            rule: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+            rule: Ensure that AWS Lambda function is configured for function-level concurrent execution limit
             comment: Only deployed to low-traffic environments where concurrency is not a concern.
           - id: CKV_AWS_173
-            rule: "Check encryption settings for Lambda environment variable"
+            rule: Check encryption settings for Lambda environment variable
             comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
@@ -502,13 +502,13 @@ Resources:
             Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
 
   JwksFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_158
-            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
             comment: KMS encryption not required as log group will not contain sensitive data.
-    Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-jwks
       RetentionInDays: 30
@@ -577,13 +577,13 @@ Resources:
         - !Ref AWS::NoValue
 
   JwksBucket:
+    Type: AWS::S3::Bucket
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_21
-            rule: "Ensure the S3 bucket has versioning enabled"
+            rule: Ensure the S3 bucket has versioning enabled
             comment: Versioning has been explicitly disabled for simplicity and cost reasons.
-    Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-jwks
       VersioningConfiguration:
@@ -648,13 +648,13 @@ Resources:
         - !Ref AWS::NoValue
 
   StatusListBucket:
+    Type: AWS::S3::Bucket
     Metadata:
       checkov:
         skip:
           - id: CKV_AWS_21
-            rule: "Ensure the S3 bucket has versioning enabled"
+            rule: Ensure the S3 bucket has versioning enabled
             comment: Versioning has been explicitly disabled for simplicity and cost reasons.
-    Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-status-list
       VersioningConfiguration:
