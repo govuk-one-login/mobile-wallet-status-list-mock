@@ -37,6 +37,13 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@de2bfaecd21d58ef232e0d2a3391c33c32c460d7 # v12.3096.0
+        with:
+          file: "./template.yaml"
+          quiet: true
+          soft_fail: false
+
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4 # v7.1.0
         env:
