@@ -558,6 +558,12 @@ Resources:
         - !Ref AWS::NoValue
 
   JwksBucket:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_21
+            rule: "Ensure the S3 bucket has versioning enabled"
+            comment: Versioning has been explicity disabled for simplicity and cost reasons.
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-jwks
@@ -623,6 +629,12 @@ Resources:
         - !Ref AWS::NoValue
 
   StatusListBucket:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_21
+            rule: "Ensure the S3 bucket has versioning enabled"
+            comment: Versioning has been explicity disabled for simplicity and cost reasons.
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-status-list
