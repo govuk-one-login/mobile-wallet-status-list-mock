@@ -210,6 +210,9 @@ Resources:
           - id: CKV_AWS_115
             rule: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
             comment: Only deployed to low-traffic environments where concurrency is not a concern.
+          - id: CKV_AWS_173
+            rule: "Check encryption settings for Lambda environment variable"
+            comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -337,6 +340,9 @@ Resources:
           - id: CKV_AWS_115
             rule: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
             comment: Only deployed to low-traffic environments where concurrency is not a concern.
+          - id: CKV_AWS_173
+            rule: "Check encryption settings for Lambda environment variable"
+            comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -461,9 +467,12 @@ Resources:
           - id: CKV_AWS_116
             rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
             comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
-            - id: CKV_AWS_115
-              rule: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
-              comment: Only deployed to low-traffic environments where concurrency is not a concern.
+          - id: CKV_AWS_115
+            rule: "Ensure that AWS Lambda function is configured for function-level concurrent execution limit"
+            comment: Only deployed to low-traffic environments where concurrency is not a concern.
+          - id: CKV_AWS_173
+            rule: "Check encryption settings for Lambda environment variable"
+            comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
