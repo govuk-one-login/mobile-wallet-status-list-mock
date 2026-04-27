@@ -581,7 +581,7 @@ Resources:
         skip:
           - id: CKV_AWS_21
             rule: "Ensure the S3 bucket has versioning enabled"
-            comment: Versioning has been explicity disabled for simplicity and cost reasons.
+            comment: Versioning has been explicitly disabled for simplicity and cost reasons.
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-jwks
@@ -652,7 +652,7 @@ Resources:
         skip:
           - id: CKV_AWS_21
             rule: "Ensure the S3 bucket has versioning enabled"
-            comment: Versioning has been explicity disabled for simplicity and cost reasons.
+            comment: Versioning has been explicitly disabled for simplicity and cost reasons.
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-status-list
