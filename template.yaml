@@ -133,6 +133,8 @@ Resources:
       Name: !Sub ${AWS::StackName}-api
       Description: Regional API gateway for the Status List Mock
       StageName: !Ref Environment
+      CacheClusterEnabled: true
+      TracingEnabled: true
       OpenApiVersion: 3.0.0
       AccessLogSetting:
         DestinationArn: !GetAtt ApiAccessLogs.Arn
