@@ -134,6 +134,7 @@ Resources:
       Description: Regional API gateway for the Status List Mock
       StageName: !Ref Environment
       CacheClusterEnabled: true
+      CacheClusterSize: 0.5
       TracingEnabled: true
       OpenApiVersion: 3.0.0
       AccessLogSetting:
