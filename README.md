@@ -35,6 +35,16 @@ Run unit tests to test the functionality of individual functions:
 npm run test
 ```
 
+#### Checkov
+
+Run Checkov to perform static code analysis on the SAM template for security and best practices:
+
+```
+npm run checkov
+```
+
+Checkov will also run upon when raising a PR and when merging to main.
+
 ### Build
 
 Build the SAM template:
