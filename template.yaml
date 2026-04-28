@@ -238,6 +238,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-issue
       Handler: src/functions/issueHandler.handler
       Role: !GetAtt IssueFunctionLambdaRole.Arn
+      ReservedConcurrentExecutions: 5
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -355,6 +356,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-revoke
       Handler: src/functions/revokeHandler.handler
       Role: !GetAtt RevokeFunctionLambdaRole.Arn
+      ReservedConcurrentExecutions: 5
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: Revoke
@@ -480,6 +482,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
+      ReservedConcurrentExecutions: 5
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
