@@ -8,6 +8,7 @@
   "scripts": {
     "build": "sam build --template template.yaml",
     "dev": "npm run localstack:up && npm run invoke:JwksFunction && npm run start:api",
+    "checkov": "checkov --file ./template.yaml",
     "format": "./node_modules/.bin/prettier --write '**/*.ts' 'openApiSpec/mock/api-spec.yaml'",
     "lint": "./node_modules/.bin/eslint ./src/functions",
     "format:check": "./node_modules/.bin/prettier --check '**/*.ts'",

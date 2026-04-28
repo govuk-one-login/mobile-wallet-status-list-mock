@@ -133,6 +133,9 @@ Resources:
       Name: !Sub ${AWS::StackName}-api
       Description: Regional API gateway for the Status List Mock
       StageName: !Ref Environment
+      CacheClusterEnabled: true
+      CacheClusterSize: "0.5"
+      TracingEnabled: true
       OpenApiVersion: 3.0.0
       AccessLogSetting:
         DestinationArn: !GetAtt ApiAccessLogs.Arn
@@ -155,6 +158,12 @@ Resources:
 
   ApiAccessLogs:
     Type: AWS::Logs::LogGroup
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-api-access-logs
       RetentionInDays: 30
@@ -194,6 +203,14 @@ Resources:
     DependsOn:
       - IssueFunctionLogGroup
     Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_116
+            rule: Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)
+            comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
+          - id: CKV_AWS_173
+            rule: Check encryption settings for Lambda environment variable
+            comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -221,6 +238,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-issue
       Handler: src/functions/issueHandler.handler
       Role: !GetAtt IssueFunctionLambdaRole.Arn
+      ReservedConcurrentExecutions: 5
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -298,6 +316,12 @@ Resources:
 
   IssueFunctionLogGroup:
     Type: AWS::Logs::LogGroup
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue
       RetentionInDays: 30
@@ -307,6 +331,14 @@ Resources:
     DependsOn:
       - RevokeFunctionLogGroup
     Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_116
+            rule: Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)
+            comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
+          - id: CKV_AWS_173
+            rule: Check encryption settings for Lambda environment variable
+            comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -324,6 +356,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-revoke
       Handler: src/functions/revokeHandler.handler
       Role: !GetAtt RevokeFunctionLambdaRole.Arn
+      ReservedConcurrentExecutions: 5
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: Revoke
@@ -411,6 +444,12 @@ Resources:
 
   RevokeFunctionLogGroup:
     Type: AWS::Logs::LogGroup
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
       RetentionInDays: 30
@@ -420,6 +459,14 @@ Resources:
     DependsOn:
       - JwksFunctionLogGroup
     Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_116
+            rule: Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)
+            comment: Cannot have a Dead Letter Queue for a function invoked by an API Gateway.
+          - id: CKV_AWS_173
+            rule: Check encryption settings for Lambda environment variable
+            comment: No sensitive information held in environment variables.
       BuildMethod: esbuild
       BuildProperties:
         EntryPoints:
@@ -435,6 +482,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-jwks
       Handler: src/functions/jwksHandler.handler
       Role: !GetAtt JwksFunctionLambdaRole.Arn
+      ReservedConcurrentExecutions: 5
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
@@ -449,6 +497,12 @@ Resources:
 
   JwksFunctionLogGroup:
     Type: AWS::Logs::LogGroup
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: Ensure that CloudWatch Log Group is encrypted by KMS
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-jwks
       RetentionInDays: 30
@@ -518,6 +572,12 @@ Resources:
 
   JwksBucket:
     Type: AWS::S3::Bucket
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_21
+            rule: Ensure the S3 bucket has versioning enabled
+            comment: Versioning has been explicitly disabled for simplicity and cost reasons.
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-jwks
       VersioningConfiguration:
@@ -583,6 +643,12 @@ Resources:
 
   StatusListBucket:
     Type: AWS::S3::Bucket
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_21
+            rule: Ensure the S3 bucket has versioning enabled
+            comment: Versioning has been explicitly disabled for simplicity and cost reasons.
     Properties:
       BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-${Environment}-status-list
       VersioningConfiguration:
