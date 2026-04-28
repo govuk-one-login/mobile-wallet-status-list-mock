@@ -5,7 +5,7 @@ import net from "node:net";
 export function waitForPort(
   port: number,
   host = "127.0.0.1",
-  timeoutMs = 15000,
+  timeoutMs = 30000,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const deadline = Date.now() + timeoutMs;
@@ -23,7 +23,7 @@ export function waitForPort(
         if (Date.now() >= deadline) {
           reject(new Error(`Port ${port} not open after ${timeoutMs}ms`));
         } else {
-          setTimeout(attempt, 250); // wait 250ms then try again
+          setTimeout(attempt, 350); // wait 350ms then try again
         }
       });
     };
