@@ -24,8 +24,8 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@stoplight/prism-cli": "^5.15.9",
     "@eslint/js": "^10.0.1",
+    "@stoplight/prism-cli": "^5.15.10",
     "@types/aws-lambda": "^8.10.161",
     "@types/jest": "^30.0.0",
     "aws-sdk-client-mock": "^4.1.0",
