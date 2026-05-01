@@ -208,7 +208,9 @@ components:
               "UNAUTHORIZED",
               "FORBIDDEN",
               "NOT_FOUND",
+              "CONFLICT",
               "INTERNAL_SERVER_ERROR",
+              "TEMPORARILY_UNAVAILABLE",
             ]
         error_description:
           type: string
@@ -275,6 +277,11 @@ paths:
                   value:
                     error: "BAD_REQUEST"
                     error_description: "Status Expiry in Payload must be a non negative number and represent a future expiry date no more than 1 year from now"
+                invalid_idempotent_request:
+                  summary: Idempotent request with invalid changes, please refer to @aws-lambda-powertools/idempotency
+                  value:
+                    error: "BAD_REQUEST"
+                    error_description: "Detected invalid changes between idempotent requests, unable to proceed. Please generate a new request."
         "401":
           description: Unauthorized - Authentication failures
           content:
@@ -327,6 +334,42 @@ paths:
                   value:
                     error: "UNAUTHORIZED"
                     error_description: "JWT has non-verified signature"
+        "409":
+          description: Conflict - Concurrent idempotent request in progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                concurrent_request:
+                  summary: Concurrent request with same idempotency key
+                  value:
+                    error: "CONFLICT"
+                    error_description: "Multiple concurrent idempotent requests in progress. Please retry after a short delay."
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                issue_failure:
+                  summary: Unable to issue a status
+                  value:
+                    error: "INTERNAL_SERVER_ERROR"
+                    error_description: "Unable to successfully issue a status"
+        "503":
+          description: Service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                service_unavailable:
+                  summary: Service is temporarily unavailable
+                  value:
+                    error: "TEMPORARILY_UNAVAILABLE"
+                    error_description: "Service is temporarily unavailable"
       x-amazon-apigateway-integration:
         requestTemplates:
           application/jwt:
@@ -523,6 +566,18 @@ paths:
                   value:
                     error: "INTERNAL_SERVER_ERROR"
                     error_description: "Error updating revokedAt field"
+        "503":
+          description: Service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                service_unavailable:
+                  summary: Service is temporarily unavailable
+                  value:
+                    error: "TEMPORARILY_UNAVAILABLE"
+                    error_description: "Service is temporarily unavailable"
       x-amazon-apigateway-integration:
         requestTemplates:
           application/jwt:
