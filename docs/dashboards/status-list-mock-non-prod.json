@@ -1,0 +1,428 @@
+{
+  "metadata": {
+    "configurationVersions": [
+      7
+    ],
+    "clusterVersion": "1.338.58.20260513-210844"
+  },
+  "id": "fcffdba0-6ef3-4b0c-b25c-403838409df0",
+  "dashboardMetadata": {
+    "name": "Wallet - OP - Status List Mock",
+    "shared": true,
+    "owner": "chris.middleton@digital.cabinet-office.gov.uk",
+    "popularity": 4,
+    "hasConsistentColors": false
+  },
+  "tiles": [
+    {
+      "name": "Markdown",
+      "tileType": "MARKDOWN",
+      "configured": true,
+      "bounds": {
+        "top": 0,
+        "left": 0,
+        "width": 418,
+        "height": 76
+      },
+      "tileFilter": {},
+      "isAutoRefreshDisabled": false,
+      "markdown": "### Intended Data-stream\n[AWS] di-mobile-wallet-onboarding-products-build"
+    },
+    {
+      "name": "Markdown",
+      "tileType": "MARKDOWN",
+      "configured": true,
+      "bounds": {
+        "top": 76,
+        "left": 0,
+        "width": 418,
+        "height": 114
+      },
+      "tileFilter": {},
+      "isAutoRefreshDisabled": false,
+      "markdown": "## Status List Mock API\n\nAPI name in 'build': wallet-status-list-mock-api\nAPI name id 'build': 6ejavwokme"
+    },
+    {
+      "name": "Requests",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 190,
+        "left": 0,
+        "width": 456,
+        "height": 304
+      },
+      "tileFilter": {},
+      "isAutoRefreshDisabled": false,
+      "customName": "Data explorer results",
+      "queries": [
+        {
+          "id": "A",
+          "spaceAggregation": "AUTO",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "apiname",
+            "aws.region",
+            "aws.account.id",
+            "dt.entity.cloud:aws:api_gateway:api",
+            "dt.source",
+            "dt.entity.cloud:aws:account",
+            "dt.entity.cloud:aws:region"
+          ],
+          "metricSelector": "cloud.aws.apigateway.countByAccountIdApiNameRegion:filter(eq(apiname,wallet-status-list-mock-api)):sum",
+          "rate": "NONE",
+          "enabled": true,
+          "histogram": false
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "unitTransform": "auto",
+            "valueFormat": "auto",
+            "properties": {
+              "color": "DEFAULT",
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "displayName": "",
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "displayName": "Number of Requests",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": [
+                "A"
+              ],
+              "defaultAxis": true
+            }
+          ]
+        },
+        "heatmapSettings": {
+          "yAxis": "VALUE"
+        },
+        "thresholds": [
+          {
+            "axisTarget": "LEFT",
+            "rules": [
+              {
+                "color": "#7dc540"
+              },
+              {
+                "color": "#f5d30f"
+              },
+              {
+                "color": "#dc172a"
+              }
+            ],
+            "visible": true
+          }
+        ],
+        "tableSettings": {
+          "hiddenColumns": []
+        },
+        "graphChartSettings": {
+          "connectNulls": false
+        },
+        "honeycombSettings": {
+          "showHive": true,
+          "showLegend": true,
+          "showLabels": false
+        }
+      },
+      "queriesSettings": {
+        "resolution": "1m"
+      },
+      "metricExpressions": [
+        "resolution=1m&(cloud.aws.apigateway.countByAccountIdApiNameRegion:filter(eq(apiname,wallet-status-list-mock-api)):sum):limit(100):names"
+      ]
+    },
+    {
+      "name": "4xx & 5xx Errors",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 190,
+        "left": 456,
+        "width": 418,
+        "height": 304
+      },
+      "tileFilter": {},
+      "isAutoRefreshDisabled": false,
+      "customName": "Data explorer results",
+      "queries": [
+        {
+          "id": "A",
+          "spaceAggregation": "AUTO",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "aws.region",
+            "method",
+            "stage",
+            "resource",
+            "aws.account.id",
+            "dt.source",
+            "dt.entity.cloud:aws:account",
+            "apiid",
+            "dt.entity.cloud:aws:region"
+          ],
+          "metricSelector": "cloud.aws.apigateway.\"5xxByAccountIdApiIdMethodRegionResourceStage\":filter(eq(apiid,6ejavwokme)):sum",
+          "rate": "NONE",
+          "enabled": true,
+          "histogram": false
+        },
+        {
+          "id": "B",
+          "spaceAggregation": "AUTO",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "aws.region",
+            "method",
+            "stage",
+            "resource",
+            "aws.account.id",
+            "dt.source",
+            "dt.entity.cloud:aws:account",
+            "apiid",
+            "dt.entity.cloud:aws:region"
+          ],
+          "metricSelector": "cloud.aws.apigateway.\"4xxByAccountIdApiIdMethodRegionResourceStage\":filter(eq(apiid,6ejavwokme)):sum",
+          "rate": "NONE",
+          "enabled": true,
+          "histogram": false
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "unitTransform": "auto",
+            "valueFormat": "auto",
+            "properties": {
+              "color": "DEFAULT",
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "unitTransform": "auto",
+            "valueFormat": "auto",
+            "properties": {
+              "color": "TURQUOISE",
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "displayName": "",
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "displayName": "",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": [
+                "A",
+                "B"
+              ],
+              "defaultAxis": true
+            }
+          ]
+        },
+        "heatmapSettings": {
+          "yAxis": "VALUE"
+        },
+        "thresholds": [
+          {
+            "axisTarget": "LEFT",
+            "rules": [
+              {
+                "color": "#7dc540"
+              },
+              {
+                "color": "#f5d30f"
+              },
+              {
+                "color": "#dc172a"
+              }
+            ],
+            "visible": true
+          }
+        ],
+        "tableSettings": {
+          "hiddenColumns": []
+        },
+        "graphChartSettings": {
+          "connectNulls": false
+        },
+        "honeycombSettings": {
+          "showHive": true,
+          "showLegend": true,
+          "showLabels": false
+        }
+      },
+      "queriesSettings": {
+        "resolution": "5m"
+      },
+      "metricExpressions": [
+        "resolution=5m&(cloud.aws.apigateway.\"5xxByAccountIdApiIdMethodRegionResourceStage\":filter(eq(apiid,\"6ejavwokme\")):sum):limit(100):names,(cloud.aws.apigateway.\"4xxByAccountIdApiIdMethodRegionResourceStage\":filter(eq(apiid,\"6ejavwokme\")):sum):limit(100):names"
+      ]
+    },
+    {
+      "name": "Average Latency",
+      "tileType": "DATA_EXPLORER",
+      "configured": true,
+      "bounds": {
+        "top": 190,
+        "left": 874,
+        "width": 418,
+        "height": 304
+      },
+      "tileFilter": {},
+      "isAutoRefreshDisabled": false,
+      "customName": "Data explorer results",
+      "queries": [
+        {
+          "id": "A",
+          "spaceAggregation": "AUTO",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "apiname",
+            "aws.region",
+            "stage",
+            "aws.account.id",
+            "dt.entity.cloud:aws:api_gateway:api",
+            "dt.source",
+            "dt.entity.cloud:aws:account",
+            "dt.entity.cloud:aws:region"
+          ],
+          "metricSelector": "cloud.aws.apigateway.latencyByAccountIdApiNameRegionStage:filter(eq(apiname,wallet-status-list-mock-api)):avg",
+          "rate": "NONE",
+          "enabled": true,
+          "histogram": false
+        },
+        {
+          "id": "B",
+          "spaceAggregation": "AUTO",
+          "timeAggregation": "DEFAULT",
+          "splitBy": [
+            "apiid"
+          ],
+          "metricSelector": "cloud.aws.apigateway.latencyByAccountIdApiIdMethodRegionResourceStage:filter(or(eq(apiid,u8oen6k124),eq(apiid,3z5tk8fll1))):splitBy(apiid):avg",
+          "rate": "NONE",
+          "enabled": true,
+          "histogram": false
+        }
+      ],
+      "visualConfig": {
+        "type": "GRAPH_CHART",
+        "global": {},
+        "rules": [
+          {
+            "matcher": "A:",
+            "unitTransform": "auto",
+            "valueFormat": "auto",
+            "properties": {
+              "color": "DEFAULT",
+              "seriesType": "COLUMN"
+            },
+            "seriesOverrides": []
+          },
+          {
+            "matcher": "B:",
+            "properties": {
+              "color": "DEFAULT"
+            },
+            "seriesOverrides": []
+          }
+        ],
+        "axes": {
+          "xAxis": {
+            "displayName": "Time in 5 minute intervals",
+            "visible": true
+          },
+          "yAxes": [
+            {
+              "displayName": "Milliseconds",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "LEFT",
+              "queryIds": [
+                "A"
+              ],
+              "defaultAxis": true
+            },
+            {
+              "displayName": "",
+              "visible": true,
+              "min": "AUTO",
+              "max": "AUTO",
+              "position": "RIGHT",
+              "queryIds": [
+                "B"
+              ],
+              "defaultAxis": true
+            }
+          ]
+        },
+        "heatmapSettings": {
+          "yAxis": "VALUE"
+        },
+        "thresholds": [
+          {
+            "axisTarget": "LEFT",
+            "rules": [
+              {
+                "color": "#7dc540"
+              },
+              {
+                "color": "#f5d30f"
+              },
+              {
+                "color": "#dc172a"
+              }
+            ],
+            "visible": true
+          }
+        ],
+        "tableSettings": {
+          "hiddenColumns": []
+        },
+        "graphChartSettings": {
+          "connectNulls": false
+        },
+        "honeycombSettings": {
+          "showHive": true,
+          "showLegend": true,
+          "showLabels": false
+        }
+      },
+      "queriesSettings": {
+        "resolution": "5m"
+      },
+      "metricExpressions": [
+        "resolution=5m&(cloud.aws.apigateway.latencyByAccountIdApiNameRegionStage:filter(eq(apiname,wallet-status-list-mock-api)):avg):limit(100):names,(cloud.aws.apigateway.latencyByAccountIdApiIdMethodRegionResourceStage:filter(or(eq(apiid,u8oen6k124),eq(apiid,\"3z5tk8fll1\"))):splitBy(apiid):avg):limit(100):names"
+      ]
+    }
+  ]
+}
